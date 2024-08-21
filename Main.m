@@ -42,4 +42,17 @@ Plot_CNN_3H_HSI_LAB('../Images/Pob_frijol_27mm/NeuroEvolution/Final46/CNNNeuroEx
 
 val = Impl_ShowEspecificSegmentationResult('../Images/Pob_frijol_27mm/','*.tif', 'P-34B');
 
+% Network training process
+Impl_TrainCNNCurve('../Images/Pob_frijol_27mm/NeuroEvolution/Final46/', '*.mat', 200, 'CNNNeuroExp2/', 'OutcomeHSI1H2D_200','HSI', 1);
+Impl_TrainCNNCurve('../Images/Pob_frijol_27mm/NeuroEvolution/Final46/', '*.mat', 200, 'CNNNeuroExp2/', 'OutcomeHSI3H2D_200','HSI', 3);
+Impl_TrainCNNCurve('../Images/Pob_frijol_27mm/NeuroEvolution/Final46/', '*.mat', 200, 'CNNNeuroExp2/', 'OutcomeLAB1H2D_200','LAB', 1);
+Impl_TrainCNNCurve('../Images/Pob_frijol_27mm/NeuroEvolution/Final46/', '*.mat', 200, 'CNNNeuroExp2/', 'OutcomeLAB3H2D_200','LAB', 3);
 
+
+
+%
+% Network training process
+Impl_TrainCNN('../Images/Pob_frijol_27mm/NeuroEvolution/Final46/', '*.mat', 200, 'CNNNeuroExp3/', 'OutcomeHSI1H2D_200','HSI', 1);
+Impl_TrainCNN('../Images/Pob_frijol_27mm/NeuroEvolution/Final46/', '*.mat', 200, 'CNNNeuroExp3/', 'OutcomeHSI3H2D_200','HSI', 3);
+Impl_TrainCNN('../Images/Pob_frijol_27mm/NeuroEvolution/Final46/', '*.mat', 200, 'CNNNeuroExp3/', 'OutcomeLAB1H2D_200','LAB', 1);
+Impl_TrainCNN('../Images/Pob_frijol_27mm/NeuroEvolution/Final46/', '*.mat', 200, 'CNNNeuroExp3/', 'OutcomeLAB3H2D_200','LAB', 3);
