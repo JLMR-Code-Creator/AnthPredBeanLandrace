@@ -8,7 +8,7 @@ val = Impl_ShowAllSegmentation('../Images/Pob_frijol_27mm/','*.tif');
 SearchPartitions('../Images/Pob_frijol_27mm/', '*.mat', '../Images/Pob_frijol_27mm/NeuroEvolution/Particion/Historico');
 
 HistoricToData('../Images/Pob_frijol_27mm/NeuroEvolution/Experimento/Historico/', '*.mat', '../Images/Pob_frijol_27mm/', '../Images/Pob_frijol_27mm/NeuroEvolution/Final');
-% Was generated data for create the database for DeepGA Algorithm and 
+% Was generated data for create the database for DeepGA Algorithm and
 % the same db for train CNN using Matlab
 ConvertH2D2CSV('../Images/Pob_frijol_27mm/NeuroEvolution/Final/', '*.mat', 'csv')
 
@@ -56,3 +56,11 @@ Impl_TrainCNN('../Images/Pob_frijol_27mm/NeuroEvolution/Final46/', '*.mat', 200,
 Impl_TrainCNN('../Images/Pob_frijol_27mm/NeuroEvolution/Final46/', '*.mat', 200, 'CNNNeuroExp3/', 'OutcomeHSI3H2D_200','HSI', 3);
 Impl_TrainCNN('../Images/Pob_frijol_27mm/NeuroEvolution/Final46/', '*.mat', 200, 'CNNNeuroExp3/', 'OutcomeLAB1H2D_200','LAB', 1);
 Impl_TrainCNN('../Images/Pob_frijol_27mm/NeuroEvolution/Final46/', '*.mat', 200, 'CNNNeuroExp3/', 'OutcomeLAB3H2D_200','LAB', 3);
+
+
+%New challenge
+% The modules and functions are derivate of the principal functions
+HistoricToDataLCH('../Images/Pob_frijol_27mm/NeuroEvolution/Experimento/Historico/', '*.mat', '../Images/Pob_frijol_27mm/', '../Images/Pob_frijol_27mm/NeuroEvolution/FinalLCH');
+
+Impl_TrainCNN_LCH('../Images/Pob_frijol_27mm/NeuroEvolution/FinalLCH/', '*.mat', 250, 'CNNNeuroExpLCH/', 'OutcomeLCH_32D_250','LCH');
+Impl_TrainCNN_LCH('../Images/Pob_frijol_27mm/NeuroEvolution/FinalLCH/', '*.mat', 250, 'CNNNeuroExpLAB/', 'OutcomeLAB_32D_250','LAB');

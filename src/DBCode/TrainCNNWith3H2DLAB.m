@@ -40,8 +40,7 @@ function TrainCNNWith3H2DLAB(XTrainLAB, ...
     convolution2dLayer([6 6], 16, 'Stride',1, 'Padding', 1); 
     batchNormalizationLayer
     reluLayer();
-    maxPooling2dLayer(4, 'Stride',2, Padding=0);
-    
+    maxPooling2dLayer(4, 'Stride',2, Padding=0);    
     ] 
 
     finalLayers = [

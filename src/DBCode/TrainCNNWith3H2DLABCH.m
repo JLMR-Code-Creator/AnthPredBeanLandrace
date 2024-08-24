@@ -1,0 +1,84 @@
+function TrainCNNWith3H2DLABCH(XTrainLCH, ...
+    YTrainLCH, XTrainPop, XTrainColor, XValidationLCH, YValidationLCH, ...
+    XValidationPop, XValidationColor, XTestLCH, YTestLCH, XTestPop, XTestColor, epoch, pathDB, dirOut, nameOut)
+rng('default')
+rng(0, "threefry")
+%gpurng(0, "threefry")
+
+XTrain = XTrainLCH;
+YTrain = mean(YTrainLCH');
+
+XValidation = XValidationLCH;
+YValidation = mean(YValidationLCH');
+
+XTest = XTestLCH;
+YTest = mean(YTestLCH');
+
+%The network has 3 convolutional layers with:
+% (16, 7, max, 2) (32, 2, max, 2) (16, 6, max, 4)
+% and 2 fully-connected layers with: (4)(64) neurons
+
+
+altura = size(XTestLCH, 1);
+ancho =  size(XTestLCH, 1);
+canales = 3;
+imageSize = [altura ancho canales];
+inputLayer = imageInputLayer(imageSize);
+sizeFilter = [7 7];
+filtros  = 16;
+middleLayers = [
+    convolution2dLayer([7 7], 16, 'Stride',1, 'Padding', 1);
+    batchNormalizationLayer
+    reluLayer();
+    maxPooling2dLayer(2, 'Stride', 2, Padding=0);
+    % Stack 2
+    convolution2dLayer([2 2], 32, 'Stride',2, 'Padding', 1);
+    batchNormalizationLayer
+    reluLayer();
+    maxPooling2dLayer(2, 'Stride',2);
+    % Stack 3
+    convolution2dLayer([6 6], 16, 'Stride',1, 'Padding', 1);
+    batchNormalizationLayer
+    reluLayer();
+    maxPooling2dLayer(4, 'Stride',2, Padding=0);
+    ]
+
+finalLayers = [
+    fullyConnectedLayer(4)
+    fullyConnectedLayer(64)
+    fullyConnectedLayer(1)
+    regressionLayer
+    ]
+layers = [
+    inputLayer
+    middleLayers
+    finalLayers
+    ]
+
+% Valores aleatorios para los pesos de las capas ocultas
+layers(2).Weights = 0.0001 * randn([sizeFilter canales filtros]);
+
+options = trainingOptions('adam',...
+    'InitialLearnRate', 0.001, ...
+    'ValidationData',{XTrain, YTrain'},...
+    'Plots','training-progress',...
+    'MaxEpochs', epoch,... % 'ExecutionEnvironment','parallel',...
+    'Verbose', true)
+
+net = trainNetwork(XTrain, YTrain', layers, options);
+
+YPredTrain = predict(net, XTrain);
+
+YPredValidation = predict(net, XValidation);
+
+YPredTest = predict(net, XTest);
+
+poblaciones = XTrainPop;
+colores =  XTrainColor;
+
+[RMSE, R2, MAPE, ~, ~, precision, STD_precision, ~] = Performance(YTrain', YPredTest)
+
+filenamemat = strcat(pathDB,dirOut, nameOut);
+save(filenamemat, 'XTrainLCH',   'YTrainLCH', 'YPredTrain',   'YPredValidation', 'YPredTest', 'XTrainPop', 'XTrainColor', 'net');
+
+end
