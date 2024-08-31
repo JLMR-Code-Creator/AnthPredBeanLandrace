@@ -2,7 +2,7 @@ function [Lab] = RGB2PCS(I_rgb, ImagesSource, file)
 % RGB2PCS function created for transform rgb to CIE L*a*b*
 % 
 % 
-    dirLAB=strcat(ImagesSource,'imgLAB/');
+    dirLAB=strcat(ImagesSource,'imgLAB');
     if (~exist(dirLAB, 'dir'))
         perfil = iccread('DSC00005.icc');
         perfil.Header.ColorSpace

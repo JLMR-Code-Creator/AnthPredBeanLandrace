@@ -5,7 +5,7 @@ imgPopulations = dir(strcat(imgPath, extension)); % Cargar todas las muestras de
      mkdir(finalDir);
  end    
  %for k = 1:length(imgPopulations)           % Recorrer las imagenes          
-for k = 1:5
+for k = 100:115
     imgfile = imgPopulations(k).name;       % Nombre del imagen       
     populationName = strrep(imgfile,'.tif','') 
     I_rgb = imread(strcat(imgPath,imgfile));    % Lectura de la imagen    

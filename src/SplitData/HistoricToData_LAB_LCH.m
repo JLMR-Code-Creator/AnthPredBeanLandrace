@@ -1,4 +1,4 @@
-function HistoricToDataLCH(pathDB, file, pathImg, pathTarget)
+function HistoricToData_LAB_LCH(pathDB, file, pathImg, pathTarget)
 % Function for read mat files that contained the binary image of the
 % separation, eachs separation contain 50% of the seeds of eachs landraces
 dbPopulations = dir(strcat(pathDB,file)); % Cargar todas las muestras de historico
@@ -8,7 +8,8 @@ N = length(dbPopulations);
 
 end
 
-function [populationName, colores, mini] = histogramas(N, sortData, pathDB, pathImg, pathTarget)
+function [populationName, colores, mini] = histogramas(N, sortData, ...
+                                              pathDB, pathImg, pathTarget)
 populationName = [];
 colores =[];
 mini = [];
@@ -18,8 +19,7 @@ for i = 1 : N
     load(strcat(pathDB,dbfile));
     dat = registro(end);
     populationName = dat.landrace;
-    color = dat.color;
-    valantocianinas = dat.antocianinas;
+    %valantocianinas = dat.antocianinas;
 
     % lectura de las imagenes
     I_rgb = imread(strcat(pathImg, populationName, '.tif'));
@@ -37,8 +37,8 @@ for i = 1 : N
     save(nombredatos,'cie_ab_e', 'cie_la_e', 'cie_lb_e', ...
         'cie_ab_p', 'cie_la_p', 'cie_lb_p', ...
         'cie_ch_e', 'cie_lc_e', 'cie_lh_e', ...
-        'cie_ch_p', 'cie_lc_p', 'cie_lh_p', ....
-        'color', 'populationName', 'valantocianinas');
+        'cie_ch_p', 'cie_lc_p', 'cie_lh_p', ...
+        'populationName');
     
 end
 end

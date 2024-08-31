@@ -58,9 +58,19 @@ Impl_TrainCNN('../Images/Pob_frijol_27mm/NeuroEvolution/Final46/', '*.mat', 200,
 Impl_TrainCNN('../Images/Pob_frijol_27mm/NeuroEvolution/Final46/', '*.mat', 200, 'CNNNeuroExp3/', 'OutcomeLAB3H2D_200','LAB', 3);
 
 
-%New challenge
+%New challengeHe
 % The modules and functions are derivate of the principal functions
 HistoricToDataLCH('../Images/Pob_frijol_27mm/NeuroEvolution/Experimento/Historico/', '*.mat', '../Images/Pob_frijol_27mm/', '../Images/Pob_frijol_27mm/NeuroEvolution/FinalLCH');
 
 Impl_TrainCNN_LCH('../Images/Pob_frijol_27mm/NeuroEvolution/FinalLCH/', '*.mat', 250, 'CNNNeuroExpLCH/', 'OutcomeLCH_32D_250','LCH');
 Impl_TrainCNN_LCH('../Images/Pob_frijol_27mm/NeuroEvolution/FinalLCH/', '*.mat', 250, 'CNNNeuroExpLAB/', 'OutcomeLAB_32D_250','LAB');
+
+% Classification of common bean landraces
+
+% Impl_Umbralization('../Images/LANDRACES1/','*.tif');
+% HomogeneousSeparation('../Images/LANDRACES/', '*.mat', '../Images/LANDRACES');
+% val = Impl_ShowAllSegmentation('../Images/LANDRACES/','*.tif');
+% Historico para la generación de datos.
+
+% HistoricToData_LAB_LCH('../Images/LANDRACES/partitions/', '*.mat', '../Images/LANDRACES/', '../Images/LANDRACES/DB_LAB_&_LCH');
+% moveFiles('../Images/LANDRACES/DB_LAB_&_LCH')
