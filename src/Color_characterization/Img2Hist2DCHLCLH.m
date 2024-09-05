@@ -18,7 +18,7 @@ data_raw=reshape(ILab, global_rows*global_cols,3);
 datosLAB=data_raw(indices,:);
 [rows,~] = size(datosLAB);
 % Compute Chrome and Hue values
-[L1, c1,h1] = CromaHueChannel(datosLAB);
+[L1, c1,h1] = CromaHueChannel1(datosLAB);
 datosLAB = [L1,c1,h1];
 datosLAB = round(datosLAB)+1;
 cie_ch=zeros(361,361);

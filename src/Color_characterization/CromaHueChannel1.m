@@ -1,4 +1,4 @@
-function [L1, c1,h1] = CromaHueChannel(lab1)
+function [L1, c1,h1] = CromaHueChannel1(lab1)
  %This module containe code that compute de Chroma and Hue values
  % of the parameters a* and b*
 

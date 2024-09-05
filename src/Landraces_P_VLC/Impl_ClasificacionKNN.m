@@ -1,103 +1,72 @@
 function [output] = Impl_ClasificacionKNN(pathImg, extension, dimensionType)
- directorio = strcat(pathImg,'DataBase','/');
- dbPopulations = dir(strcat(directorio,extension)); % Cargar todas las muestras de entrenamiento 
- N=length(dbPopulations);
- resAccuClase = [];
- resAccuSuperClase = [];
- for i = 1 : N
-    dbfile = dbPopulations(i).name;       % Nombre de la db 
-    disp([int2str(i), ' ', dbfile]);
-    db = load(strcat(directorio, dbfile), '-mat');
-    if(strcmp(dimensionType, 'Espectro'))
-        train = db.train_espectro;
-        test = db.test_espectro;
-        train_clase = db.train_espectroClase;
-        train_superClase = db.train_espectroSuperClase;
-        test_clase = db.test_espectroClase;
-        test_superClase = db.test_espectroSuperClase;
-    elseif(strcmp(dimensionType, 'RGB'))    
-        train = db.train_rgb;
-        test = db.test_rgb;
-        train_clase = db.train_Clase;
-        train_superClase = db.train_SuperClase;  
-        test_clase = db.test_Clase;
-        test_superClase = db.test_SuperClase;
-    elseif(strcmp(dimensionType, 'HSI'))    
-        train = db.train_hsi;
-        test = db.test_hsi;
-        train_clase = db.train_Clase;
-        train_superClase = db.train_SuperClase;
-        test_clase = db.test_Clase;
-        test_superClase = db.test_SuperClase;
-    elseif(strcmp(dimensionType, 'LAB'))    
-        train = db.train_lab;
-        test = db.test_lab;
-        train_clase = db.train_Clase;
-        train_superClase = db.train_SuperClase;   
-        test_clase = db.test_Clase;
-        test_superClase = db.test_SuperClase;        
-    elseif(strcmp(dimensionType, 'HSILABRGB'))    
-        train = [db.train_hsi, db.train_lab, db.train_rgb];
-        test = [db.test_hsi, db.test_lab, db.test_rgb];
-        train_clase = db.train_Clase;
-        train_superClase = db.train_SuperClase;
-        test_clase = db.test_Clase;
-        test_superClase = db.test_SuperClase;        
-    elseif(strcmp(dimensionType, 'HSILAB'))    
-        train = [db.training_hsi, db.training_lab];
-        test = [db.test_hsi, db.test_lab];
-        train_clase = db.training_Clase;
-        train_superClase = db.training_SuperClase;   
-    elseif(strcmp(dimensionType, 'HSAB'))    
-        train = [db.training_hsi(:,1:2), db.training_lab(:,1:2)];
-        test = [db.test_hsi(:,1:2), db.test_lab(:,1:2)];
-        train_clase = db.training_Clase;
-        train_superClase = db.training_SuperClase;          
-    else     
-        [train, test, train_clase, train_superClase] = structDB2TrainingandTest(db,1,size(db.dataset,1), dimensionType);
-    end
-    %%
-    accuracyClase = [];
-    accuracySuperClase = [];
-    kvector = [1, 3, 5 ,7, 9];
-    distance = 'cityblock';
-    ponderar = 'squaredinverse';
-   for K=1:length(kvector) % para k1, k3
-         [Accu1] = knn_Matlab(train, test, train_clase, test_clase, distance, kvector(K), ponderar);
-         [Accu2] = knn_Matlab(train, test, train_superClase,test_superClase, distance,kvector(K), ponderar);
-          accuracyClase = [accuracyClase,(Accu1)];       
-          accuracySuperClase = [accuracySuperClase,(Accu2)];       
-   end
-%    
-%        Model = fitcecoc(train,train_clase,'ClassNames',train_clase');
-%        out = predict(Model,test);
-%        accuracyClase = sum(string(train_clase) == string(out),'all')/numel(out)
-%        Model = fitcecoc(train,train_superClase,'ClassNames',train_superClase');
-%        out = predict(Model,test);
-%        accuracySuperClase = sum(string(train_superClase) == string(out),'all')/numel(out);
+      directorio = strcat(pathImg,'/');
+      dbPopulations = dir(strcat(directorio,extension)); % Cargar todas las muestras de entrenamiento 
+      N=length(dbPopulations);
+      resAccuClase_lab = [];
+      resAccuClase_lch = [];
+      train_lab = [];
+      test_lab = [];
+      train_lch = [];
+      test_lch = []; 
+      clase = [];
+      for i = 1 : N % 1 to total db bean landraces
+         dbfile = dbPopulations(i).name;       % Database name
+         disp([int2str(i), ' ', dbfile]);       
+         db = load(strcat(directorio, dbfile), '-mat'); % load database
+         disp(['   Reshape 2D' , db.populationName]);
+         %% Training Data Section
+         sizelab = size(db.cie_ab_e, 1) * size(db.cie_ab_e, 2);
+         sizelch = size(db.cie_ch_e, 1) * size(db.cie_ch_e, 2);
+     
+         cie_ab_e = reshape(db.cie_ab_e, sizelab, 1)';
+         cie_la_e = reshape(db.cie_la_e, sizelab, 1)';
+         cie_lb_e = reshape(db.cie_lb_e, sizelab, 1)';
+         cie_ab_p = reshape(db.cie_ab_p, sizelab, 1)';
+         cie_la_p = reshape(db.cie_la_p, sizelab, 1)';
+         cie_lb_p = reshape(db.cie_lb_p, sizelab, 1)';
+         % db lab
+         res_train_lab = [cie_ab_e, cie_la_e, cie_lb_e];
+         res_test_lab =  [cie_ab_p, cie_la_p, cie_lb_p];
+         train_lab = [train_lab;res_train_lab];
+         test_lab = [test_lab;res_test_lab];
 
-
-   resAccuClase = [resAccuClase;accuracyClase];
-   resAccuSuperClase = [resAccuSuperClase;accuracySuperClase];
-
-end   
-
-  resAccuClase=[resAccuClase;mean(resAccuClase);std(resAccuClase)]
-  resAccuSuperClase=[resAccuSuperClase;mean(resAccuSuperClase);std(resAccuSuperClase)]
+         cie_ch_e = reshape(db.cie_ch_e, sizelch, 1)';
+         cie_lc_e = reshape(db.cie_lc_e, sizelch, 1)';
+         cie_lh_e = reshape(db.cie_lh_e, sizelch, 1)';
+         cie_ch_p = reshape(db.cie_ch_p, sizelch, 1)';
+         cie_lc_p = reshape(db.cie_lc_p, sizelch, 1)';
+         cie_lh_p = reshape(db.cie_lh_p, sizelch, 1)';
+         % db lch 
+         res_train_lch = [cie_ch_e, cie_lc_e, cie_lh_e];
+         res_test_lch =  [cie_ch_p, cie_lc_p, cie_lh_p];
+         train_lch = [train_lch;res_train_lch];
+         test_lch = [test_lch;res_test_lch]; 
+     
+         clase =[clase; {db.populationName}];
+     
+     end   
+     
+     [accuracyClase_lab] = k_NN(train_lab, test_lab, clase, clase);
+     [accuracyClase_lch] = k_NN(train_lch, test_lch, clase, clase);
    
-  contador = 1:1:N+2; % vector para las etiquetas
-  Concentrado_clase = table([contador',resAccuClase]);
-  Concentrado_superClase = table([contador',resAccuSuperClase]);
+     resAccuClase_lab = [resAccuClase_lab;accuracyClase_lab];   
+     resAccuClase_lab = [resAccuClase_lab;mean(resAccuClase_lab);std(resAccuClase_lab)];
 
-    finalDir = strcat(pathImg, 'Report');
-    if ~exist('',finalDir)
-        mkdir(finalDir);
-    end   
-  
-   %filename = strcat(finalDir,'/SVM_',dimensionType,'_concentrado_',distance,'_',ponderar,'.xlsx');
-   filename = strcat(finalDir,'/KNN_',dimensionType,'_concentrado_','.xlsx');
-   writetable(Concentrado_clase,filename,'Sheet',1);
-   writetable(Concentrado_superClase,filename,'Sheet',2);
-   output = 1;
-end
+     resAccuClase_lch = [resAccuClase_lch;accuracyClase_lch];
+     resAccuClase_lch = [resAccuClase_lch;mean(resAccuClase_lch);std(resAccuClase_lch)];
 
+     contador = 1:1:N+2; 
+     Concentrado_clase_lab = table([contador',resAccuClase_lab]);
+     Concentrado_clase_lch = table([contador',resAccuClase_lch]);
+     
+     finalDir = strcat(pathImg, 'Report');
+     if ~exist('',finalDir)
+         mkdir(finalDir);
+     end   
+       
+     filename = strcat(finalDir,'/KNN_',dimensionType,'_concentrado_','.xlsx');
+     writetable(Concentrado_clase_lab,filename,'Sheet', 1);
+     writetable(Concentrado_clase_lch,filename,'Sheet', 2);
+     output = 1;
+     
+     end

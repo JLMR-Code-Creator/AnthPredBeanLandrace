@@ -74,3 +74,8 @@ Impl_TrainCNN_LCH('../Images/Pob_frijol_27mm/NeuroEvolution/FinalLCH/', '*.mat',
 
 % HistoricToData_LAB_LCH('../Images/LANDRACES/partitions/', '*.mat', '../Images/LANDRACES/', '../Images/LANDRACES/DB_LAB_&_LCH');
 % moveFiles('../Images/LANDRACES/DB_LAB_&_LCH')
+
+[output] = Impl_ClasificacionKNN('../Images/LANDRACES/DB_LAB_&_LCH/DB', '*.mat', 0)
+
+Image2GetMediana('../Images/Pob_frijol_27mm/', '*.tif', '');
+GetClases('../Images/LANDRACES/')
