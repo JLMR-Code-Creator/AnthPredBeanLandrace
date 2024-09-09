@@ -68,13 +68,24 @@ matfile = dir(strcat(pathImg,'Masks/*.mat'));  % Cargar mascara de cada poblaci?
     end % for i3
     % Get class label using K-NN algorith
     [clase_lab] = KNNEvaluation(train_lab, test_lab, clase);   % train_median_lab
-    %[clase_lab] = KNNEvaluation(train_median_lab, test_median_lab, clase);    
+    %[clase_lab] = KNNEvaluation(train_median_lab, test_median_lab, clase);  
+    % quantification of grain for coloration
+    categoricItems = categorical(clase_lab);
+    ClassCategories = categories(categoricItems);
+    Classquatities = countcats(categoricItems);
+    tblPercantage = {};
+    for m = 1:count(ClassCategories)
+        val = ClassCategories{m};
+        per = Classquatities{m}
+        tblPercantage = [tblPercantage; m, per];
+    end
+
     finalClass =  unique(clase_lab);
     finalClass = string(finalClass);
     finalClass = sort(finalClass,"ascend");
 
     register = matfile(k);
-    save(rutadbFile, "finalClass", "register", "populationName");
+    save(rutadbFile, "finalClass", "register", "populationName", "clase_lab", "tblPercantage");
     
 end
 
