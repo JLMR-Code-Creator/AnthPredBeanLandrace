@@ -77,5 +77,7 @@ Impl_TrainCNN_LCH('../Images/Pob_frijol_27mm/NeuroEvolution/FinalLCH/', '*.mat',
 
 [output] = Impl_ClasificacionKNN('../Images/LANDRACES/DB_LAB_&_LCH/DB', '*.mat', 0)
 
-Image2GetMediana('../Images/Pob_frijol_27mm/', '*.tif', '');
-GetClases('../Images/LANDRACES/')
+%Image2GetMediana('../Images/Pob_frijol_27mm/', '*.tif', '');
+%GetClases('../Images/LANDRACES/', '../Images/DB');% for DB creation
+% Now read a db a classify eachs landraces
+ReadDB2AssignLabel('../Images/DB','../Images/LANDRACES/', '');
