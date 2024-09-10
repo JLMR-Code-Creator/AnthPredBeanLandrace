@@ -74,10 +74,11 @@ matfile = dir(strcat(pathImg,'Masks/*.mat'));  % Cargar mascara de cada poblaci?
     ClassCategories = categories(categoricItems);
     Classquatities = countcats(categoricItems);
     tblPercantage = {};
-    for m = 1:count(ClassCategories)
+    for m = 1:length(ClassCategories)
         val = ClassCategories{m};
-        per = Classquatities{m}
-        tblPercantage = [tblPercantage; m, per];
+        quantitie = Classquatities(m);
+        percentage = quantitie/sum(Classquatities)
+        tblPercantage = [tblPercantage; m, quantitie, percentage];
     end
 
     finalClass =  unique(clase_lab);
