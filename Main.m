@@ -81,3 +81,4 @@ Impl_TrainCNN_LCH('../Images/Pob_frijol_27mm/NeuroEvolution/FinalLCH/', '*.mat',
 %GetClases('../Images/LANDRACES/', '../Images/DB');% for DB creation
 % Now read a db a classify eachs landraces
 ReadDB2AssignLabel('../Images/DB','../Images/LANDRACES/', '');
+val = Impl_ShowAllSegmentation('../Images/LANDRACES/','PC-001-TOO-001-R1-C1.tif');

@@ -4,8 +4,8 @@ imgPopulations = dir(strcat(imgPath, extension)); % Cargar todas las muestras de
  if ~exist('',finalDir)
      mkdir(finalDir);
  end    
- %for k = 1:length(imgPopulations)           % Recorrer las imagenes          
-for k = 100:115
+for k = 1:length(imgPopulations)           % Recorrer las imagenes          
+%for k = 100:115
     imgfile = imgPopulations(k).name;       % Nombre del imagen       
     populationName = strrep(imgfile,'.tif','') 
     I_rgb = imread(strcat(imgPath,imgfile));    % Lectura de la imagen    
@@ -31,7 +31,17 @@ for k = 100:115
     seg_t(:,:,2)= seg_t(:,:,2).*borde;
     seg_t(:,:,3)= seg_t(:,:,3).*borde;
     seg_t=uint16(seg_t);      
-    subplot(2,2,3), imagesc(seg_t), title('Fondo');     
+    subplot(2,2,3), imagesc(seg_t), title('Fondo');  
+    
+    borde = ~Mask;
+    seg_t2=double(I_rgb);  % Obtenci?n de la imagen para dejar la parte segmentada
+    seg_t2 = uint8(seg_t2/256);
+    seg_t2 = seg_t2 + uint8(255 * borde);
+    %seg_t=uint16(seg_t);      
+    subplot(2,2,4), imagesc(seg_t2), title('Fondo');  
+
+
+
  end
 output = 1;
 
