@@ -10,8 +10,8 @@ function [clases]=iteraPoblacion(pathDB, pathImg, train_lab, train_median_lab, c
 matfile = dir(strcat(pathImg,'Masks/*.mat'));  % Cargar mascara de cada poblaci?nl
 
  for k = 1:length(matfile)            % Recorrer las imagenes
-    archivo = matfile(k).name;        % Nombre del imagen
-    populationName = strrep(archivo,'.mat',''); % Nombre de la poblaci?n
+     archivo = matfile(k).name;        % Nombre del imagen
+     populationName = strrep(archivo,'.mat',''); % Nombre de la poblaci?n
 
     rutadbFile = strcat(pathDB, filesep, 'Clases',filesep, populationName,'.mat');
     if isfile(rutadbFile)

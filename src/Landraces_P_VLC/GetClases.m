@@ -128,7 +128,17 @@ function  GetClases(pathImg, target)
               save(fileName,"cie_ab","cie_la","cie_lb","mediana","class");  
               Mask_tmp = ~Mask_tmp;
               [subimage] = cutImage(I,uint8(Mask_tmp));
-              imwrite(subimage,strcat(fileName,".png"));              
+              imwrite(subimage,strcat(fileName,".png"));  
+            elseif strcmp(class,'Variegado') == 1
+              ruta = strcat(target,'/','Variegado');
+              numFile = string(datetime('now'));
+              numFile = strrep(numFile,' ','');
+              numFile = strrep(numFile,':','_');
+              fileName=strcat(ruta,'/','Variegado_',num2str(numFile));
+              save(fileName,"cie_ab","cie_la","cie_lb","mediana","class");  
+              Mask_tmp = ~Mask_tmp;
+              [subimage] = cutImage(I,uint8(Mask_tmp));
+              imwrite(subimage,strcat(fileName,".png"));                  
           end
        end % end for objects
        close all;

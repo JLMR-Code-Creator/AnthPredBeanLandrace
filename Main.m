@@ -75,10 +75,15 @@ Impl_TrainCNN_LCH('../Images/Pob_frijol_27mm/NeuroEvolution/FinalLCH/', '*.mat',
 % HistoricToData_LAB_LCH('../Images/LANDRACES/partitions/', '*.mat', '../Images/LANDRACES/', '../Images/LANDRACES/DB_LAB_&_LCH');
 % moveFiles('../Images/LANDRACES/DB_LAB_&_LCH')
 
-[output] = Impl_ClasificacionKNN('../Images/LANDRACES/DB_LAB_&_LCH/DB', '*.mat', 0)
+[output] = Impl_ClasificacionKNN('../Images/LANDRACES/DB_LAB_&_LCH/DB', '*.mat', 0);
 
+%% section created for color quantification
 %Image2GetMediana('../Images/Pob_frijol_27mm/', '*.tif', '');
 %GetClases('../Images/LANDRACES/', '../Images/DB');% for DB creation
 % Now read a db a classify eachs landraces
 ReadDB2AssignLabel('../Images/DB','../Images/LANDRACES/', '');
-val = Impl_ShowAllSegmentation('../Images/LANDRACES/','PC-001-TOO-001-R1-C1.tif');
+%val = Impl_ShowAllSegmentation('../Images/LANDRACES/','PC-001-TOO-001-R1-C1.tif');
+[correctas, incorrectas] = ShowColorQuantification('../Images/LANDRACES/', '../Images/DB/Clases');
+
+%% Section for classification of bean landraces.
+% Firts adjust the nethod for assing label automatic
