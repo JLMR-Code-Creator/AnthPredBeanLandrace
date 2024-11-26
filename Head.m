@@ -13,6 +13,7 @@ classdef Head
             addpath src/MATFiles
             addpath src/StatisticalTest
             addpath src/Landraces_P_VLC
+            addpath src/Classification
             close all;
             clear;
             clc;
