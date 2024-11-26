@@ -58,88 +58,16 @@ function  GetSeedAnalysis(pathImg, target)
             Mask_tmp(index) = 0;
           end
           Mask_tmp = ~Mask_tmp;
-          [cie_ab, cie_la, cie_lb, mediana] = Img2Hist2DABLALB_Median(I_Lab, Mask_tmp); 
-          if strcmp(class,'Black') == 1
-              ruta = strcat(target,'/','Black');
-              numFile = string(datetime('now'));
-              numFile = strrep(numFile,' ','');
-              numFile = strrep(numFile,':','_');
-              fileName=strcat(ruta,'/','Black_',num2str(numFile));
-              save(fileName,"cie_ab","cie_la","cie_lb","mediana","class");
-              Mask_tmp = ~Mask_tmp;
-              [subimage] = cutImage(I,uint8(Mask_tmp));
-              imwrite(subimage,strcat(fileName,".png"));
-          elseif strcmp(class,'Red') == 1
-              ruta = strcat(target,'/','Red');
-              numFile = string(datetime('now'));
-              numFile = strrep(numFile,' ','');
-              numFile = strrep(numFile,':','_');
-              fileName=strcat(ruta,'/','Red_',num2str(numFile));
-              save(fileName,"cie_ab","cie_la","cie_lb","mediana","class");
-              Mask_tmp = ~Mask_tmp;
-              [subimage] = cutImage(I,uint8(Mask_tmp));
-              imwrite(subimage,strcat(fileName,".png"));              
-          elseif strcmp(class,'Brown') == 1
-              ruta = strcat(target,'/','Brown');
-              numFile = string(datetime('now'));
-              numFile = strrep(numFile,' ','');
-              numFile = strrep(numFile,':','_');
-              fileName=strcat(ruta,'/','Brown_',num2str(numFile));
-              save(fileName,"cie_ab","cie_la","cie_lb","mediana","class");
-              Mask_tmp = ~Mask_tmp;
-              [subimage] = cutImage(I,uint8(Mask_tmp));
-              imwrite(subimage,strcat(fileName,".png"));              
-          elseif strcmp(class,'Yellow') == 1
-              ruta = strcat(target,'/','Yellow');
-              numFile = string(datetime('now'));
-              numFile = strrep(numFile,' ','');
-              numFile = strrep(numFile,':','_');
-              fileName=strcat(ruta,'/','Yellow_',num2str(numFile));
-              save(fileName,"cie_ab","cie_la","cie_lb","mediana","class");
-              Mask_tmp = ~Mask_tmp;
-              [subimage] = cutImage(I,uint8(Mask_tmp));
-              imwrite(subimage,strcat(fileName,".png"));              
-          elseif strcmp(class,'Pink') == 1
-              ruta = strcat(target,'/','Pink');
-              numFile = string(datetime('now'));
-              numFile = strrep(numFile,' ','');
-              numFile = strrep(numFile,':','_');
-              fileName=strcat(ruta,'/','Pink_',num2str(numFile));
-              save(fileName,"cie_ab","cie_la","cie_lb","mediana","class");
-              Mask_tmp = ~Mask_tmp;
-              [subimage] = cutImage(I,uint8(Mask_tmp));
-              imwrite(subimage,strcat(fileName,".png"));              
-          elseif strcmp(class,'Purple') == 1
-              ruta = strcat(target,'/','Purple');
-              numFile = string(datetime('now'));
-              numFile = strrep(numFile,' ','');
-              numFile = strrep(numFile,':','_');
-              fileName=strcat(ruta,'/','Purple_',num2str(numFile));
-              save(fileName,"cie_ab","cie_la","cie_lb","mediana","class");
-              Mask_tmp = ~Mask_tmp;
-              [subimage] = cutImage(I,uint8(Mask_tmp));
-              imwrite(subimage,strcat(fileName,".png"));              
-          elseif strcmp(class,'White') == 1
-              ruta = strcat(target,'/','White');
-              numFile = string(datetime('now'));
-              numFile = strrep(numFile,' ','');
-              numFile = strrep(numFile,':','_');
-              fileName=strcat(ruta,'/','White_',num2str(numFile));
-              save(fileName,"cie_ab","cie_la","cie_lb","mediana","class");  
-              Mask_tmp = ~Mask_tmp;
-              [subimage] = cutImage(I,uint8(Mask_tmp));
-              imwrite(subimage,strcat(fileName,".png"));  
-            elseif strcmp(class,'Variegado') == 1
-              ruta = strcat(target,'/','Variegado');
-              numFile = string(datetime('now'));
-              numFile = strrep(numFile,' ','');
-              numFile = strrep(numFile,':','_');
-              fileName=strcat(ruta,'/','Variegado_',num2str(numFile));
-              save(fileName,"cie_ab","cie_la","cie_lb","mediana","class");  
-              Mask_tmp = ~Mask_tmp;
-              [subimage] = cutImage(I,uint8(Mask_tmp));
-              imwrite(subimage,strcat(fileName,".png"));                  
-          end
+          Lab_Values = ROILab(I_Lab, Mask_tmp)';
+          cform = makecform('lab2srgb','AdaptedWhitePoint',whitepoint('D65'));
+          RGB = applycform(Lab_Values',cform);
+          figure();
+          scatter3(Lab_Values(3,:),Lab_Values(2,:),Lab_Values(1,:),12,RGB,'fill');
+          xlabel('b*'),ylabel('a*'),zlabel('L*');
+          %[cie_ab, cie_la, cie_lb] = Pixel2DABLALB(Lab_Values)
+          %figure; surf(cie_ab);
+          groupcounts(Lab_Values)
+         % [subimage] = cutImage(I,uint8(Mask_tmp));
        end % end for objects
        close all;
      end % end for matfiles
