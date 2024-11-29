@@ -58,15 +58,31 @@ function  GetSeedAnalysis(pathImg, target)
             Mask_tmp(index) = 0;
           end
           Mask_tmp = ~Mask_tmp;
-          Lab_Values = ROILab(I_Lab, Mask_tmp)';
+          [Lab_Values,pixels ]= ROILab(I_Lab, Mask_tmp);
+          Lab_Values = Lab_Values';
           cform = makecform('lab2srgb','AdaptedWhitePoint',whitepoint('D65'));
           RGB = applycform(Lab_Values',cform);
           figure();
           scatter3(Lab_Values(3,:),Lab_Values(2,:),Lab_Values(1,:),12,RGB,'fill');
           xlabel('b*'),ylabel('a*'),zlabel('L*');
-          %[cie_ab, cie_la, cie_lb] = Pixel2DABLALB(Lab_Values)
-          %figure; surf(cie_ab);
-          groupcounts(Lab_Values)
+          [cie_ab, cie_la, cie_lb] = Pixel2DABLALB(Lab_Values')
+          figure; mesh(cie_lb);
+          Iblur = imgaussfilt(cie_lb, 3);
+          figure(); mesh(Iblur);
+          %ab = reshape(Iblur, size(Iblur, 1)* size(Iblur, 2), 1)';
+          aabb= sum(Iblur');
+          [pks, locs] = findpeaks(abs(aabb))
+          ptCloud = pointCloud(pixels);
+          point = [128,128,128];
+          K = length(pks);
+          [indices,dists] = findNearestNeighbors(ptCloud,point,K);
+          figure();
+          pcshow(ptCloud)
+          hold on
+          plot3(point(1),point(2),point(3),'*r')
+          plot3(ptCloud.Location(indices,1),ptCloud.Location(indices,2),ptCloud.Location(indices,3),'*')
+          legend('Point Cloud','Query Point','Nearest Neighbors','Location','southoutside','Color',[1 1 1])
+          hold off
          % [subimage] = cutImage(I,uint8(Mask_tmp));
        end % end for objects
        close all;
