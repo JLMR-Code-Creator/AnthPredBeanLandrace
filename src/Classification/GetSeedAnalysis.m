@@ -58,44 +58,52 @@ function  GetSeedAnalysis(pathImg, target)
             Mask_tmp(index) = 0;
           end
           Mask_tmp = ~Mask_tmp;
-          [Lab_Values,pixels ]= ROILab(I_Lab, Mask_tmp);
-          Lab_Values = Lab_Values';
+          [Lab_Values,~ ]= ROILab(I_Lab, Mask_tmp);
+          %Lab_Values = Lab_Values';
+
+          % remove outliers in 3D point data
+          distance = sqrt(sum(Lab_Values.^2,2));
+          indices = distance<(mean(distance)+std(distance)); %note I use smaller than instead of bigger
+          remainingPoints = Lab_Values(indices,:);          
+
+          % plot to 3D points
+          PixelValues  =  remainingPoints'
           cform = makecform('lab2srgb','AdaptedWhitePoint',whitepoint('D65'));
-          RGB = applycform(Lab_Values',cform);
+          RGB = applycform(remainingPoints,cform); %3x....
           figure();
-          scatter3(Lab_Values(3,:),Lab_Values(2,:),Lab_Values(1,:),12,RGB,'fill');
+          scatter3(PixelValues(3,:),PixelValues(2,:),PixelValues(1,:),12,RGB,'fill');
           xlabel('b*'),ylabel('a*'),zlabel('L*');
-          [cie_ab, cie_la, cie_lb] = Pixel2DABLALB(Lab_Values')
+          
+          % Building bidimensional histograms 
+          [cie_ab, cie_la, cie_lb, pixels] = Pixel2DABLALB(remainingPoints)
           figure; mesh(cie_lb);
+
+          % apply gaussian filter with sigma = 3
           Iblur = imgaussfilt(cie_lb, 3);
           figure(); mesh(Iblur);
-          %ab = reshape(Iblur, size(Iblur, 1)* size(Iblur, 2), 1)';
+          
+          % Sumas de filas de la matriz
           aabb= sum(Iblur');
           [pks, locs] = findpeaks(abs(aabb))
+      
+          % Find K-Nearest Neighbors in a Point Cloud
           ptCloud = pointCloud(pixels);
           point = [128,128,128];
           K = length(pks);
           [indices,dists] = findNearestNeighbors(ptCloud,point,K);
           figure();
-          pcshow(ptCloud)
+          %pcshow(ptCloud)
+          coorLAB = ptCloud.Location';
+          scatter3(coorLAB(3,:),coorLAB(2,:),coorLAB(1,:),12,RGB,'fill');
+          xlabel('b*'),ylabel('a*'),zlabel('L*');
           hold on
-          plot3(point(1),point(2),point(3),'*r')
-          plot3(ptCloud.Location(indices,1),ptCloud.Location(indices,2),ptCloud.Location(indices,3),'*')
+          scatter3(point(1),point(2),point(3),'or')
+          scatter3(ptCloud.Location(indices,1),ptCloud.Location(indices,2),ptCloud.Location(indices,3),'*')
           legend('Point Cloud','Query Point','Nearest Neighbors','Location','southoutside','Color',[1 1 1])
           hold off
-         % [subimage] = cutImage(I,uint8(Mask_tmp));
+
        end % end for objects
        close all;
      end % end for matfiles
 
-end
-
-function [subimage] =cutImage(Irgb,BI)
-    %LB=bwlabel(BI);
-    imgResult = Irgb .* cat(3, BI, BI, BI);
-    BI2 = ~BI;
-    imgResult = imgResult + uint8(255 * BI2);
-    bound = regionprops(BI,'BoundingBox');
-    coord = bound.BoundingBox;
-    subimage = imcrop(imgResult,[coord(1),coord(2),coord(3),coord(4)]);
 end

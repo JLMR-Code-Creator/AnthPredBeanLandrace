@@ -1,4 +1,4 @@
-function [cie_ab, cie_la, cie_lb] = Pixel2DABLALB(pixels)
+function [cie_ab, cie_la, cie_lb, pixels] = Pixel2DABLALB(pixels)
 
     [rows,~] = size(pixels);
     pixels(:,1) = pixels(:,1) / 100;     % l* normalizaci?n
