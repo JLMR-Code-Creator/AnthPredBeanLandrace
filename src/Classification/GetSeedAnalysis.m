@@ -59,20 +59,15 @@ function  GetSeedAnalysis(pathImg, target)
           end
           Mask_tmp = ~Mask_tmp;
           [Lab_Values,~ ]= ROILab(I_Lab, Mask_tmp);
-          %Lab_Values = Lab_Values';
+         
+          plot3dpoints(Lab_Values);
 
-          % remove outliers in 3D point data
-          distance = sqrt(sum(Lab_Values.^2,2));
-          indices = distance<(mean(distance)+std(distance)); %note I use smaller than instead of bigger
-          remainingPoints = Lab_Values(indices,:);          
+          % remove outliers in 3D point data of seed bean
+          distance = sqrt(sum(Lab_Values.^2, 2));
+          indices = distance < (mean(distance) + std(distance)); %note I use smaller than instead of bigger
+          remainingPoints = Lab_Values(indices, :);          
 
-          % plot to 3D points
-          PixelValues  =  remainingPoints'
-          cform = makecform('lab2srgb','AdaptedWhitePoint',whitepoint('D65'));
-          RGB = applycform(remainingPoints,cform); %3x....
-          figure();
-          scatter3(PixelValues(3,:),PixelValues(2,:),PixelValues(1,:),12,RGB,'fill');
-          xlabel('b*'),ylabel('a*'),zlabel('L*');
+          plot3dpoints(remainingPoints);
           
           % Building bidimensional histograms 
           [cie_ab, cie_la, cie_lb, pixels] = Pixel2DABLALB(remainingPoints)
@@ -86,24 +81,54 @@ function  GetSeedAnalysis(pathImg, target)
           aabb= sum(Iblur');
           [pks, locs] = findpeaks(abs(aabb))
       
-          % Find K-Nearest Neighbors in a Point Cloud
-          ptCloud = pointCloud(pixels);
-          point = [128,128,128];
+          pix = [remainingPoints(:,1),remainingPoints(:,3)];
           K = length(pks);
-          [indices,dists] = findNearestNeighbors(ptCloud,point,K);
-          figure();
-          %pcshow(ptCloud)
-          coorLAB = ptCloud.Location';
-          scatter3(coorLAB(3,:),coorLAB(2,:),coorLAB(1,:),12,RGB,'fill');
-          xlabel('b*'),ylabel('a*'),zlabel('L*');
+          GMModel = fitgmdist(pix, K);
+          figure();scatter(pix(:,1),pix(:,2),10,'.') % Scatter plot with points of size 10
           hold on
-          scatter3(point(1),point(2),point(3),'or')
-          scatter3(ptCloud.Location(indices,1),ptCloud.Location(indices,2),ptCloud.Location(indices,3),'*')
-          legend('Point Cloud','Query Point','Nearest Neighbors','Location','southoutside','Color',[1 1 1])
-          hold off
+          gmPDF = @(x,y) arrayfun(@(x0,y0) pdf(GMModel,[x0 y0]),x,y);
+          fcontour(gmPDF,[1 200])
+
+          idx = cluster(GMModel,pix);
+          figure();
+          hold on
+          scatter3(remainingPoints(idx==1, 1),remainingPoints(idx==1, 2),remainingPoints(idx==1, 3),'.r')
+          scatter3(remainingPoints(idx==2, 1),remainingPoints(idx==2, 2),remainingPoints(idx==2, 3),'.g')
+          %opts = statset('Display','iter');
+          %[idx,C,sumd,d,midx,info] = kmedoids(pix,2,'Distance','cityblock','Options',opts);
+
+
+          % Find K-Nearest Neighbors in a Point Cloud
+          % ptCloud = pointCloud(pixels);
+          % p1 = median(pixels(:,1));
+          % p2 = median(pixels(:,2));
+          % p3 = median(pixels(:,3));
+          % point = [p1, p2, p3];
+          % K = length(pks);
+          % [indices, dists] = findNearestNeighbors(ptCloud, point, K);
+          % figure();
+          % pcshow(ptCloud, "BackgroundColor",[1 1 1]),
+          % colorbar(Color=[1 1 1])
+          % colormap("winter")
+          % xlabel('b*'),ylabel('a*'),zlabel('L*');
+          % hold on
+          % scatter3(point(1),point(2),point(3),'or')
+          % scatter3(ptCloud.Location(indices,1),ptCloud.Location(indices,2),ptCloud.Location(indices,3),'*')
+          % legend('Point Cloud','Query Point','Nearest Neighbors','Location','southoutside','Color',[1 1 1])
+          % hold off
 
        end % end for objects
        close all;
      end % end for matfiles
 
+end
+
+function plot3dpoints(remainingPoints)
+   % plot to 3D points
+   PixelValues  =  remainingPoints'
+   cform = makecform('lab2srgb','AdaptedWhitePoint',whitepoint('D65'));
+   RGB = applycform(remainingPoints,cform); %3x....
+   figure();
+   scatter3(PixelValues(3,:),PixelValues(2,:),PixelValues(1,:),12,RGB,'fill');
+   xlabel('b*'),ylabel('a*'),zlabel('L*');
 end
