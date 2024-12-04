@@ -70,17 +70,30 @@ function  GetSeedAnalysis(pathImg, target)
           plot3dpoints(remainingPoints);
           
           % Building bidimensional histograms 
-          [cie_ab, cie_la, cie_lb, pixels] = Pixel2DABLALB(remainingPoints)
+          [cie_ab, cie_la, cie_lb, pixels] = Pixel2DABLALB(remainingPoints);
           figure; mesh(cie_lb);
 
           % apply gaussian filter with sigma = 3
-          Iblur = imgaussfilt(cie_lb, 3);
-          figure(); mesh(Iblur);
+          %Iblur = imgaussfilt(cie_lb, 1);
+          %figure(); mesh(Iblur);
+          H = fspecial('gaussian', 9, 3);
+          Iblur = imfilter(cie_lb,H,'replicate');
+          figure(); mesh(Iblur);          
           
           % Sumas de filas de la matriz
+          v_x_axis = 1:256;
           aabb= sum(Iblur');
-          [pks, locs] = findpeaks(abs(aabb))
-      
+          [pks, locs] = findpeaks(abs(aabb), v_x_axis)
+          figure();
+          hold on;
+          plot(aabb)
+          plot(locs,pks,'rx');
+          hold off;
+
+          [TF1,P] = islocalmin(aabb);
+          figure();plot(v_x_axis,aabb,v_x_axis(TF1),aabb(TF1),'r*')
+          axis tight
+
           pix = [remainingPoints(:,1),remainingPoints(:,3)];
           K = length(pks);
           GMModel = fitgmdist(pix, K);
@@ -92,8 +105,13 @@ function  GetSeedAnalysis(pathImg, target)
           idx = cluster(GMModel,pix);
           figure();
           hold on
-          scatter3(remainingPoints(idx==1, 1),remainingPoints(idx==1, 2),remainingPoints(idx==1, 3),'.r')
-          scatter3(remainingPoints(idx==2, 1),remainingPoints(idx==2, 2),remainingPoints(idx==2, 3),'.g')
+          unicos = unique(idx);
+          hold on;
+          for i=1:length(unicos)
+            scatter3(remainingPoints(idx==i, 3),remainingPoints(idx==i, 2),remainingPoints(idx==i, 1),'.')    
+          end
+          hold off;          
+          %scatter3(remainingPoints(idx==2, 3),remainingPoints(idx==2, 2),remainingPoints(idx==2, 1),'.g')
           %opts = statset('Display','iter');
           %[idx,C,sumd,d,midx,info] = kmedoids(pix,2,'Distance','cityblock','Options',opts);
 
