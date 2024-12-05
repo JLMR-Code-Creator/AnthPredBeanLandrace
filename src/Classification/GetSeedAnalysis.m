@@ -59,8 +59,8 @@ function  GetSeedAnalysis(pathImg, target)
           end
           Mask_tmp = ~Mask_tmp;
           [Lab_Values,~ ]= ROILab(I_Lab, Mask_tmp);
-         
-          plot3dpoints(Lab_Values);
+          
+          %plot3dpoints(Lab_Values);
 
           % remove outliers in 3D point data of seed bean
           distance = sqrt(sum(Lab_Values.^2, 2));
@@ -69,20 +69,18 @@ function  GetSeedAnalysis(pathImg, target)
 
           plot3dpoints(remainingPoints);
           
-          % Building bidimensional histograms 
-          [cie_ab, cie_la, cie_lb, pixels] = Pixel2DABLALB(remainingPoints);
-          figure; mesh(cie_lb);
+         
+          %[cie_ch, cie_lc, cie_lh, c1] = Pixels2Hist2DCHLCLH(remainingPoints);
+          %figure; mesh(cie_lc);
 
-          % apply gaussian filter with sigma = 3
-          %Iblur = imgaussfilt(cie_lb, 1);
-          %figure(); mesh(Iblur);
-          H = fspecial('gaussian', 9, 3);
-          Iblur = imfilter(cie_lb,H,'replicate');
-          figure(); mesh(Iblur);          
           
-          % Sumas de filas de la matriz
-          v_x_axis = 1:256;
-          aabb= sum(Iblur');
+          %aabb= sum(Iblur');
+          %[pks, locs] = findpeaks(abs(aabb), v_x_axis)
+          figure();
+          v_x_axis = 1:25;
+          a = histogram(remainingPoints(:,1),25);
+          %figure();plot(a.Values);
+          aabb = a.Values;
           [pks, locs] = findpeaks(abs(aabb), v_x_axis)
           figure();
           hold on;
@@ -90,50 +88,41 @@ function  GetSeedAnalysis(pathImg, target)
           plot(locs,pks,'rx');
           hold off;
 
-          [TF1,P] = islocalmin(aabb);
-          figure();plot(v_x_axis,aabb,v_x_axis(TF1),aabb(TF1),'r*')
-          axis tight
+          %[TF1,P] = islocalmin(aabb);
+          %figure();plot(v_x_axis,aabb,v_x_axis(TF1),aabb(TF1),'r*')
+          %axis tight
 
-          pix = [remainingPoints(:,1),remainingPoints(:,3)];
+          
           K = length(pks);
+          pix = remainingPoints;%[remainingPoints(:,1),remainingPoints(:,3)];
           GMModel = fitgmdist(pix, K);
-          figure();scatter(pix(:,1),pix(:,2),10,'.') % Scatter plot with points of size 10
-          hold on
-          gmPDF = @(x,y) arrayfun(@(x0,y0) pdf(GMModel,[x0 y0]),x,y);
-          fcontour(gmPDF,[1 200])
+          %pix = [remainingPoints(:,1),remainingPoints(:,3)];
+          %figure();scatter(pix(:,1),pix(:,2),10,'.') % Scatter plot with points of size 10
+          %hold on
+          %gmPDF = @(x,y) arrayfun(@(x0,y0) pdf(GMModel,[x0 y0]),x,y);
+          %fcontour(gmPDF,[1 200])
 
           idx = cluster(GMModel,pix);
-          figure();
-          hold on
+          figure();          
           unicos = unique(idx);
           hold on;
           for i=1:length(unicos)
-            scatter3(remainingPoints(idx==i, 3),remainingPoints(idx==i, 2),remainingPoints(idx==i, 1),'.')    
+            scatter3(remainingPoints(idx==i, 3),remainingPoints(idx==i, 2),remainingPoints(idx==i, 1),12,'.')    
+            xlabel('b*'),ylabel('a*'),zlabel('L*');
           end
           hold off;          
-          %scatter3(remainingPoints(idx==2, 3),remainingPoints(idx==2, 2),remainingPoints(idx==2, 1),'.g')
-          %opts = statset('Display','iter');
-          %[idx,C,sumd,d,midx,info] = kmedoids(pix,2,'Distance','cityblock','Options',opts);
-
-
-          % Find K-Nearest Neighbors in a Point Cloud
-          % ptCloud = pointCloud(pixels);
-          % p1 = median(pixels(:,1));
-          % p2 = median(pixels(:,2));
-          % p3 = median(pixels(:,3));
-          % point = [p1, p2, p3];
-          % K = length(pks);
-          % [indices, dists] = findNearestNeighbors(ptCloud, point, K);
-          % figure();
-          % pcshow(ptCloud, "BackgroundColor",[1 1 1]),
-          % colorbar(Color=[1 1 1])
-          % colormap("winter")
-          % xlabel('b*'),ylabel('a*'),zlabel('L*');
-          % hold on
-          % scatter3(point(1),point(2),point(3),'or')
-          % scatter3(ptCloud.Location(indices,1),ptCloud.Location(indices,2),ptCloud.Location(indices,3),'*')
-          % legend('Point Cloud','Query Point','Nearest Neighbors','Location','southoutside','Color',[1 1 1])
-          % hold off
+          
+          % Histograms
+          
+          unicos = unique(idx);
+          for i=1:length(unicos)
+            dataPixeles = remainingPoints(idx==i, :);
+            [cie_ab, cie_la, cie_lb, pixels] = Pixel2DABLALB(dataPixeles);
+            figure(); mesh(cie_lb);                      
+          end
+          
+          
+          
 
        end % end for objects
        close all;
@@ -144,7 +133,7 @@ end
 function plot3dpoints(remainingPoints)
    % plot to 3D points
    PixelValues  =  remainingPoints'
-   cform = makecform('lab2srgb','AdaptedWhitePoint',whitepoint('D65'));
+   cform = makecform('lab2srgb','AdaptedWhitePoint',whitepoint('icc'));
    RGB = applycform(remainingPoints,cform); %3x....
    figure();
    scatter3(PixelValues(3,:),PixelValues(2,:),PixelValues(1,:),12,RGB,'fill');
