@@ -73,9 +73,6 @@ function  GetSeedAnalysis(pathImg, target)
           %[cie_ch, cie_lc, cie_lh, c1] = Pixels2Hist2DCHLCLH(remainingPoints);
           %figure; mesh(cie_lc);
 
-          
-          %aabb= sum(Iblur');
-          %[pks, locs] = findpeaks(abs(aabb), v_x_axis)
           figure();
           v_x_axis = 1:25;
           a = histogram(remainingPoints(:,1),25);
@@ -88,11 +85,7 @@ function  GetSeedAnalysis(pathImg, target)
           plot(locs,pks,'rx');
           hold off;
 
-          %[TF1,P] = islocalmin(aabb);
-          %figure();plot(v_x_axis,aabb,v_x_axis(TF1),aabb(TF1),'r*')
-          %axis tight
-
-          
+         
           K = length(pks);
           pix = remainingPoints;%[remainingPoints(:,1),remainingPoints(:,3)];
           GMModel = fitgmdist(pix, K);
@@ -107,7 +100,7 @@ function  GetSeedAnalysis(pathImg, target)
           unicos = unique(idx);
           hold on;
           for i=1:length(unicos)
-            scatter3(remainingPoints(idx==i, 3),remainingPoints(idx==i, 2),remainingPoints(idx==i, 1),12,'.')    
+            scatter3(remainingPoints(idx==i, 3),remainingPoints(idx==i, 2),remainingPoints(idx==i, 1),12,'fill')    
             xlabel('b*'),ylabel('a*'),zlabel('L*');
           end
           hold off;          
