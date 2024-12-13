@@ -35,7 +35,8 @@ function  GetLandracesAnalysis(pathImg, target)
 
        [Lab_Values,~ ]= ROILab(I_Lab, ~Mask);
 
-       plot3dpoints(Lab_Values);
+       %plot3dpoints(Lab_Values);
+       plot_Lab(4,Lab_Values,1,'',12,0);
 
        % remove outliers in 3D point data of seed bean
        distance = sqrt(sum(Lab_Values.^2, 2));
