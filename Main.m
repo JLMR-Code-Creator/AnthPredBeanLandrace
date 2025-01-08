@@ -88,3 +88,5 @@ ReadDB2AssignLabel('../Images/DB','../Images/LANDRACES/', '');
 %% Section for classification of bean landraces.
 % Firts adjust the nethod for assing label automatic
 GetSeedAnalysis('../Images/LANDRACES/', '../Images/DB');% for DB creation
+
+PlotLandracesInCIE('../Images/LANDRACES/', '../Images/DB');
