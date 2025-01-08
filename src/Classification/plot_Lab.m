@@ -1,4 +1,4 @@
-function f = plot_Lab(mode,Lab,createnewfig,markercolor,markersize,storeme)
+function f = plot_Lab(mode,Lab,createnewfig,markercolor,markersize,storeme, txt)
 % This function visualizes several different CIE-Lab_plot plots from 
 % CIE-Lab coordinate data in 'Lab'. Either 2D, 3D or projected 3D, with 
 % samples projected on the ab, La and Lb plane are supported option for
@@ -132,9 +132,10 @@ switch mode
         end
         
     case {3,4} %3D plot
-        scatter3(Lab(3,:),Lab(2,:),Lab(1,:),markersize,RGB,'fill');
-        xlabel('b*'),ylabel('a*'),zlabel('L*');
+        scatter3(Lab(2,:),Lab(3,:),Lab(1,:),markersize,RGB,'fill');
+        xlabel('a*'),ylabel('b*'),zlabel('L*');
         title('CIE-L*a*b* coordinates');
+        subtitle(txt);
         axis([min_Lab(3) max_Lab(3) min_Lab(2) max_Lab(2) min_Lab(1) max_Lab(1)]);grid on;hold on;
                 
         % draw black lines indicating axis

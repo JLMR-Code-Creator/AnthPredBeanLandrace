@@ -1,6 +1,6 @@
 function PlotLandracesInCIE(pathImg, target)
     matfile = dir(strcat(pathImg,'Masks/*.mat'));                       % Cargar mascara de cada poblaci?n
-     for k = 90:100%length(matfile)   
+     for k = 89:95%length(matfile)   
        archivo = matfile(k).name;        % Nombre del imagen
        populationName = strrep(archivo,'.mat',''); % Nombre de la poblaci?n
        nombre=strcat(pathImg,'Masks/');
@@ -23,7 +23,7 @@ function PlotLandracesInCIE(pathImg, target)
        [I_Lab] = RGB2PCS(I, pathImg, strcat(populationName, '.tif'));
        I = uint8(I/256);
        SeedsCIE = [];
-       for i3=1:size(propied,1)
+       parfor i3=1:size(propied,1)
           seedValue =  i3; 
           seeds = 1:N;
           seeds = uint8(seeds);
@@ -39,7 +39,12 @@ function PlotLandracesInCIE(pathImg, target)
           SeedsCIE = [SeedsCIE; median(Lab_Values)];
        end % end for objects
        %figure();
-       plot_Lab(6,SeedsCIE',1,'',12,0);
+       load("valuesLAB.mat");
+       MaxL = max(SeedsCIE(:,1));
+       L=coordLAB(:,1)<MaxL;
+       newdata=coordLAB(L,:);
+       seeds = [newdata;SeedsCIE];
+       plot_Lab(4,seeds',1,'',12,0,populationName);
    
      end % end for matfiles
 
