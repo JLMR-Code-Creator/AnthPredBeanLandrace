@@ -1,4 +1,4 @@
-function PlotLandracesInCIE(pathImg, target)
+function PlotMedianColorLandraces(pathImg, target)
     matfile = dir(strcat(pathImg,'Masks/*.mat'));                       % Cargar mascara de cada poblaci?n
      for k = 1:length(matfile)   
        archivo = matfile(k).name;        % Nombre del imagen
