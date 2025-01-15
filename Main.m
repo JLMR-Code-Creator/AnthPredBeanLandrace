@@ -90,3 +90,6 @@ ReadDB2AssignLabel('../Images/DB','../Images/LANDRACES/', '');
 GetSeedAnalysis('../Images/LANDRACES/', '../Images/DB');% for DB creation
 
 PlotLandracesInCIE('../Images/LANDRACES/', '../Images/DB');
+%********* El siguiente codigo es para generar el valor de la mediana LAB de cada semilla
+LandracesInCIEtoMAT('../Images/Pob_frijol_27mm/', '../Images/MedianLandraces');
+PlotMedianColorLandraces( '../Images/MedianLandraces/','')
