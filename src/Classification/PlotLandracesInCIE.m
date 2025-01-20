@@ -3,6 +3,9 @@ matfile = dir(strcat(pathImg,'Masks/*.mat'));                       % Cargar mas
 for k = 1:length(matfile)
      archivo = matfile(k).name;        % Nombre del imagen
      populationName = strrep(archivo,'.mat',''); % Nombre de la poblaci?n
+       if strcmp(archivo, 'PC-034-TOO-119-R3-C2.mat') == 0
+           continue;
+       end     
      nombre=strcat(pathImg,'Masks/');
      L = load(strcat(nombre,archivo)); % Carga el archivo de la m?scara
      Mask = uint8(L.Mask);

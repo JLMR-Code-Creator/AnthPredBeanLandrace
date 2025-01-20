@@ -64,8 +64,10 @@ set(f,'Position',[200,screen(4)-screen(4)/3-200,screen(3)/2,screen(4)/3]);
 
 %% prepare the color data
 if mode==2 || mode==4 || mode==6
-    cform = makecform('lab2srgb','AdaptedWhitePoint',whitepoint('D65'));
+    cform = makecform('lab2srgb','AdaptedWhitePoint', [0.964202880859375,0.999984741210938,0.825195312500000]);
     RGB = applycform(Lab',cform);
+    %cform = makecform('lab2srgb','AdaptedWhitePoint',whitepoint('D65'));
+    %
 else
     RGB = markercolor;
 end

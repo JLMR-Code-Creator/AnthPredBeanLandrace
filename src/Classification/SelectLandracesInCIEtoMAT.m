@@ -3,7 +3,11 @@ function SelectLandracesInCIEtoMAT(pathImg, target)
 % mediana de color que es guardada en una ruta específica.
     matfile = dir(strcat(pathImg,'Masks/*.mat')); 
      for k = 1:length(matfile)   
-       archivo = matfile(k).name;                  % Nombre del imagen
+       archivo = matfile(k).name; % Nombre del imagen
+       if strcmp(archivo, 'PC-034-TOO-038-R1-C1.mat') == 0
+           continue;
+       end
+           
        populationName = strrep(archivo,'.mat',''); % Nombre de la poblaci?n
        nombre=strcat(pathImg,'Masks/');
        L = load(strcat(nombre,archivo)); % Carga el archivo de la m?scara        
