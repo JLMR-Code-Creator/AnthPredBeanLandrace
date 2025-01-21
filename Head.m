@@ -14,6 +14,7 @@ classdef Head
             addpath src/StatisticalTest
             addpath src/Landraces_P_VLC
             addpath src/Classification
+            addpath src/ColorPallete
             close all;
             clear;
             clc;
