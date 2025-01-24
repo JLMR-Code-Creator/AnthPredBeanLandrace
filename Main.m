@@ -93,3 +93,7 @@ PlotLandracesInCIE('../Images/LANDRACES/', '../Images/DB');
 %********* El siguiente codigo es para generar el valor de la mediana LAB de cada semilla
 LandracesInCIEtoMAT('../Images/Pob_frijol_27mm/', '../Images/MedianLandraces');
 PlotMedianColorLandraces( '../Images/MedianLandraces/','')
+
+% Color pallete creation
+
+% Using the algoritmh for training and classify test samples

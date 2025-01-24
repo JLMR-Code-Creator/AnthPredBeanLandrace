@@ -25,7 +25,7 @@ function LandracesInH2DtoMAT(pathImg, target)
       
        SeedsCIE = [];
        for i3=1:size(propied,1)
-          seedValue =  i3; 
+          seedValue =  i3;
           seeds = 1:N;
           seeds = uint8(seeds);
           seeds(seeds==seedValue) = [];

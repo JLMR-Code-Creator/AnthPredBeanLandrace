@@ -19,7 +19,7 @@ function [cie_ab, cie_la, cie_lb, pixels] = Pixel2DABLALB(pixels)
     cie_la=zeros(256,256);
     tic
     for i=1:rows 
-        ind = pixels(i,:)
+        ind = pixels(i,:);
         cie_la(ind(1),ind(2)) = cie_la(ind(1), ind(2)) + 1;
     end       
     toc

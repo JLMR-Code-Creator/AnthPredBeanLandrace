@@ -40,7 +40,7 @@ function [output] = Impl_ClasificacionKNN(pathImg, extension, dimensionType)
          res_train_lch = [cie_ch_e, cie_lc_e, cie_lh_e];
          res_test_lch =  [cie_ch_p, cie_lc_p, cie_lh_p];
          train_lch = [train_lch;res_train_lch];
-         test_lch = [test_lch;res_test_lch]; 
+         test_lch = [test_lch;res_test_lch];
      
          clase =[clase; {db.populationName}];
      
