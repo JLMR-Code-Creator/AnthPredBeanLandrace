@@ -12,16 +12,16 @@ for k = 1:length(matfile)
      Mask = ~Mask;
      % Limpieza de pixeles
      % Clean up small groups pixels
-     [ML, ~]=bwlabel(Mask);         % Etiquetar granos de frijol conectados
-     propied= regionprops(ML);      % Calcular propiedades de los objetos de la imagen
-     s=find([propied.Area] < 1000); % grupos menores a 100 px
+     [ML, ~]=bwlabel(Mask);          % Etiquetar granos de frijol conectados
+     propied= regionprops(ML);       % Calcular propiedades de los objetos de la imagen
+     s=find([propied.Area] < 1000);  % grupos menores a 100 px
      for i1=1:size(s,2)              % eliminaci�n de pixeles
           index = ML == s(i1);
           Mask(index) = 0;
      end
      
      [ML, N] = bwlabel(Mask);         % Etiquetar granos de frijol conectados
-     propied = regionprops(ML);      % Calcular propiedades de los objetos de la imagen
+     propied = regionprops(ML);       % Calcular propiedades de los objetos de la imagen
      I = imread(strcat(pathImg,populationName,'.tif'));
      [I_Lab] = RGB2PCS(I, pathImg, strcat(populationName, '.tif'));
      I = uint8(I/256);

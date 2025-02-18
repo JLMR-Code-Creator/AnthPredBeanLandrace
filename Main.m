@@ -91,8 +91,11 @@ GetSeedAnalysis('../Images/LANDRACES/', '../Images/DB');% for DB creation
 
 PlotLandracesInCIE('../Images/LANDRACES/', '../Images/DB');
 %********* El siguiente codigo es para generar el valor de la mediana LAB de cada semilla
+% el resultado es un conjunto de valores de pixeles de las regiones de
+% interés.
 LandracesInCIEtoMAT('../Images/Pob_frijol_27mm/', '../Images/MedianLandraces');
-PlotMedianColorLandraces( '../Images/MedianLandraces/','')
+
+PlotMedianColorLandraces( 'Z:/MedianLandraces/Black/','')
 
 % Color pallete creation
 

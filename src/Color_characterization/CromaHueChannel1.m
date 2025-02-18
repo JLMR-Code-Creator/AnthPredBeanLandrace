@@ -1,6 +1,6 @@
-function [L1, c1,h1] = CromaHueChannel1(lab1)
- %This module containe code that compute de Chroma and Hue values
- % of the parameters a* and b*
+function [ L1, c1, h1] = CromaHueChannel1(lab1)
+%This module containe code that compute de Chroma and Hue values
+% of the parameters a* and b*
 
 tam = size(lab1, 1);% size of matrix
 h1 = zeros(tam, 1); % To create hue matrix

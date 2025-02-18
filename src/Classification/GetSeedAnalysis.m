@@ -18,7 +18,7 @@ function  GetSeedAnalysis(pathImg, target)
        end
 
        [ML, N] = bwlabel(Mask);         % Etiquetar granos de frijol conectados       
-       propied = regionprops(ML);      % Calcular propiedades de los objetos de la imagen
+       propied = regionprops(ML);       % Calcular propiedades de los objetos de la imagen
        I = imread(strcat(pathImg,populationName,'.tif'));
        [I_Lab] = RGB2PCS(I, pathImg, strcat(populationName, '.tif'));
        I = uint8(I/256);
@@ -27,7 +27,7 @@ function  GetSeedAnalysis(pathImg, target)
        set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
        hold on;
        ML = uint8(ML);
-       for i2=1:size(propied,1)              % eliminaci�n de pixeles           
+       for i2 = 1 : size(propied,1)              % eliminaci�n de pixeles           
           %drawrectangle('Position',propied(i).BoundingBox, LineWidth=0.5,MarkerSize=0.1,Color='r',Label=num2str(ML(round(propied(i).Centroid(2)),round(propied(i).Centroid(1)))));
           text(round(propied(i2).Centroid(1)),round(propied(i2).Centroid(2)),num2str(ML(round(propied(i2).Centroid(2)),round(propied(i2).Centroid(1)))),'FontSize',10,'color','red');
        end  
