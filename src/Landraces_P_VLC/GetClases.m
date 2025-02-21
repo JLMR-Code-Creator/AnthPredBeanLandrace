@@ -1,4 +1,6 @@
 function  GetClases(pathImg, target)
+% Función que permite obtener la información de las semillas destinadas
+% para el algoritmo de clasificación.
     matfile = dir(strcat(pathImg,'Masks/*.mat'));                       % Cargar mascara de cada poblaci?n
      for k = 1:length(matfile)   
        archivo = matfile(k).name;        % Nombre del imagen

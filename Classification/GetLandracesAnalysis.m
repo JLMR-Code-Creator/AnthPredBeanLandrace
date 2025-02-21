@@ -1,6 +1,4 @@
 function  GetLandracesAnalysis(pathImg, target)
-% Función para obtener la distribución de color de cada población de
-% frijol
     matfile = dir(strcat(pathImg,'Masks/*.mat'));                       % Cargar mascara de cada poblaci?n
      for k = 1:length(matfile)   
        archivo = matfile(k).name;        % Nombre del imagen
