@@ -15,7 +15,7 @@ function [clases]=iteraPoblacion(pathImg, train_lab, train_median_lab, clase)
        mkdir(folderClases)
     end
 
-    for k = 1:length(matfile)             
+    for k = 20:length(matfile)             
         archivo = matfile(k).name;        % File name
         populationName = strrep(archivo,'.mat','');
         rutadbFile = strcat(folderClases,filesep, populationName,'.mat');
@@ -28,6 +28,7 @@ function [clases]=iteraPoblacion(pathImg, train_lab, train_median_lab, clase)
         Mask = L.Mask;
         disp([datestr(datetime), ' Procesando población ',populationName]);
         % Read each seed for classify
+        Mask = ~Mask; % We verify that ROI has zero values for the correct labeled  
         % Clean up small groups pixels
         [ML, ~]=bwlabel(Mask);          % Etiquetar granos de frijol conectados
         propied= regionprops(ML);       % Calcular propiedades de los objetos de la imagen
@@ -36,7 +37,7 @@ function [clases]=iteraPoblacion(pathImg, train_lab, train_median_lab, clase)
             index = ML == s(i1);
             Mask(index) = 0;
         end
-        Mask = ~Mask;
+        
         [ML, N] = bwlabel(Mask);         % Etiquetar granos de frijol conectados       
         propied = regionprops(ML);      % Calcular propiedades de los objetos de la imagen
         I = imread(strcat(pathImg,populationName,'.tif'));
@@ -58,7 +59,7 @@ function [clases]=iteraPoblacion(pathImg, train_lab, train_median_lab, clase)
             seeds(seeds==seedValue) = [];
             Mask_tmp = Mask; 
             for j1=1:length(seeds)
-                value = seeds(j1);
+                value = seeds(j1)
                 index = ML == value;
                 Mask_tmp(index) = 0;
             end
@@ -85,7 +86,7 @@ function [clases]=iteraPoblacion(pathImg, train_lab, train_median_lab, clase)
             totalPixels = size(remainingPoints, 1);
             for i=1:length(unicos)
                 dataPixeles = remainingPoints(idx==i, :);
-                if (size(dataPixeles, 1) / totalPixels)<.15
+                if (size(dataPixeles, 1) / totalPixels)<=.10
                     continue;
                 end
                 [cie_ab, cie_la, cie_lb, pixels] = Pixel2DABLALB(dataPixeles);
@@ -118,7 +119,7 @@ function [clases]=iteraPoblacion(pathImg, train_lab, train_median_lab, clase)
             tblPercantage = [tblPercantage; m, quantitie, percentage];
         end
 
-        finalClass =  unique(clase_lab);
+        finalClass =  unique(listClasses);
         finalClass = string(finalClass);
         finalClass = sort(finalClass,"ascend");
 
@@ -129,7 +130,7 @@ function [clases]=iteraPoblacion(pathImg, train_lab, train_median_lab, clase)
 
 end % end function
 function clases = KNNEvaluation(train, test, labeltraining)
-   kvector = 9; %1, 3, 5 ,7,
+   kvector = 5; %1, 3, 5 ,7,
    distance = 'cityblock';
    ponderar = 'squaredinverse';
    for K=1:length(kvector) 
