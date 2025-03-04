@@ -15,8 +15,8 @@ function [clases]=iteraPoblacion(pathImg, train_lab, train_median_lab, clase)
        mkdir(folderClases)
     end
 
-    for k = 20:length(matfile)             
-        archivo = matfile(k).name;        % File name
+    for ik = 1:length(matfile)             
+        archivo = matfile(ik).name;        % File name
         populationName = strrep(archivo,'.mat','');
         rutadbFile = strcat(folderClases,filesep, populationName,'.mat');
         if isfile(rutadbFile)
@@ -44,37 +44,45 @@ function [clases]=iteraPoblacion(pathImg, train_lab, train_median_lab, clase)
         [I_Lab] = RGB2PCS(I, pathImg, strcat(populationName, '.tif'));
         I = uint8(I/256); %% 16 to 8 bits 
         listClasses = {};
-        test_lab = [];
-        test_median_lab = [];
+        Final_Lab_Values = []; %para el almacenamiento del conjunto de pixels
+        se = strel("disk",15);
+        M = Mask;
+        Mask = imerode(M,se);
+       %imshow(BW3)
 
         %% Folder tmp for validate name to each seed landraces
         folderLandraces = strcat(pathImg, populationName);
         if ~exist(folderLandraces, 'dir')
             mkdir(folderLandraces)
         end
-
+         
         for i3=1:N % In each grain get the class
             seeds = 1:N;
             seedValue =  i3;
             seeds(seeds==seedValue) = [];
             Mask_tmp = Mask; 
             for j1=1:length(seeds)
-                value = seeds(j1)
+                value = seeds(j1);
                 index = ML == value;
                 Mask_tmp(index) = 0;
             end
+
             Mask_tmp = ~Mask_tmp;
             [Lab_Values,~ ]= ROILab(I_Lab, Mask_tmp);
 
             % remove outliers in 3D point data of seed bean
             distance = sqrt(sum(Lab_Values.^2, 2));
-            indices = distance < (mean(distance) + std(distance)); %note I use smaller than instead of bigger
+            indices = distance < (median(distance)+ std(distance)); %note I use smaller than instead of bigger
             remainingPoints = Lab_Values(indices, :);          
 
             v_x_axis = 1:25;
             [counts, edges] = histcounts(remainingPoints(:,1), 25);
+            %a = histogram(remainingPoints(:,1),25);
+            %figure();plot(a.Values);
          
-            [pks, locs] = findpeaks(abs(counts), v_x_axis);
+            [pks, locs] = findpeaks(abs(counts), v_x_axis, ...
+                'MinPeakDistance',v_x_axis(5),...
+                'MinPeakProminence',35, 'Annotate','extents');
         
             K = length(pks)
             pix = remainingPoints;
@@ -87,6 +95,7 @@ function [clases]=iteraPoblacion(pathImg, train_lab, train_median_lab, clase)
             for i=1:length(unicos)
                 dataPixeles = remainingPoints(idx==i, :);
                 if (size(dataPixeles, 1) / totalPixels)<=.10
+                    %Plot_Points(dataPixeles,populationName);
                     continue;
                 end
                 [cie_ab, cie_la, cie_lb, pixels] = Pixel2DABLALB(dataPixeles);
@@ -96,9 +105,10 @@ function [clases]=iteraPoblacion(pathImg, train_lab, train_median_lab, clase)
                 cie_lb_e = reshape(cie_lb, sizelab, 1)';
                 seed_test_lab =  [cie_ab_e, cie_la_e, cie_lb_e];
                 %test_lab = [test_lab;seed_test_lab];
-                [clase_lab] = KNNEvaluation(train_lab, seed_test_lab, clase); 
+                [clase_lab] = KNNEvaluation(train_lab, seed_test_lab, clase, 99); 
                 listClasses = [listClasses; clase_lab];
                 nameClassLandraces = strcat(nameClassLandraces, '-', clase_lab);
+                Final_Lab_Values = [Final_Lab_Values; dataPixeles];
             end
             %% Guardar la imagen de la semilla para validar etiqueta
               fileName = strcat(folderLandraces,'/',num2str(i3), string(nameClassLandraces));  
@@ -122,15 +132,22 @@ function [clases]=iteraPoblacion(pathImg, train_lab, train_median_lab, clase)
         finalClass =  unique(listClasses);
         finalClass = string(finalClass);
         finalClass = sort(finalClass,"ascend");
+        finalClass = strjoin(finalClass);
+        %% Creación del histograma de la población
+        %  será creado un archivo que contendrá triple histograma
+        %  el nombre de archivo de la población, el histograma, la etiqueta de color  
+        % Las carpetas de almacenado de histogramas será HistLAB HistLCH
+        %[histLAB, histLCH] = BuildHistograms(Final_Lab_Values);
 
-        register = matfile(k);
-        save(rutadbFile, "finalClass", "register", "populationName", "clase_lab", "tblPercantage");
+        %register = matfile(k);
+        save(rutadbFile, "finalClass", "populationName", "Final_Lab_Values");
     
     end
 
 end % end function
-function clases = KNNEvaluation(train, test, labeltraining)
-   kvector = 5; %1, 3, 5 ,7,
+%% Algorithm of machine learning
+function clases = KNNEvaluation(train, test, labeltraining, kvector)
+    %= 9; %1, 3, 5 ,7,
    distance = 'cityblock';
    ponderar = 'squaredinverse';
    for K=1:length(kvector) 
@@ -139,7 +156,25 @@ function clases = KNNEvaluation(train, test, labeltraining)
      clases = predict(Model, test);   
    end  
 end
+%% Building of histograms two-dimensionales
+function [histLAB, histLCH] = BuildHistograms(ROIpixelValues)
+    [cie_ab, cie_la, cie_lb, ~] = Pixel2DABLALB(ROIpixelValues);
+    sizelab = size(cie_ab, 1) * size(cie_ab, 2);
+    cie_ab_e = reshape(cie_ab, sizelab, 1)';
+    cie_la_e = reshape(cie_la, sizelab, 1)';
+    cie_lb_e = reshape(cie_lb, sizelab, 1)';
+    histLAB =  [cie_ab_e, cie_la_e, cie_lb_e];
+    
+    [cie_ch, cie_lc, cie_lh, ~] = Pixels2Hist2DCHLCLH(ROIpixelValues);
+    sizelch = size(cie_ch, 1) * size(cie_ch, 2);
+    cie_ch_e = reshape(cie_ch, sizelch, 1)';
+    cie_lc_e = reshape(cie_lc, sizelch, 1)';
+    cie_lh_e = reshape(cie_lh, sizelch, 1)';
+    histLCH =  [cie_ch_e, cie_lc_e, cie_lh_e];
+end
 
+
+%% Load mat file with color references
 function [train_lab, train_median_lab, clase] = loadTrainDataandClases(pathDB, nameDataSet)
    rootdir = pathDB;
    filename1 = strcat(rootdir,filesep, nameDataSet);
@@ -148,7 +183,7 @@ function [train_lab, train_median_lab, clase] = loadTrainDataandClases(pathDB, n
    clase =  db.clase;
    train_median_lab = db.train_median_lab;
 end
-
+%% Cut ROI of seed of landraces
 function [subimage] =cutImage(Irgb,BI)
     %LB=bwlabel(BI);
     imgResult = Irgb .* cat(3, BI, BI, BI);
