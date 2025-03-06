@@ -81,7 +81,8 @@ function [clases]=iteraPoblacion(pathImg, train_lab, train_median_lab, clase, tr
             %figure();plot(a.Values);
          
             [pks, locs] = findpeaks(abs(counts), v_x_axis, ...
-                'MinPeakDistance',v_x_axis(5));
+                'MinPeakDistance',v_x_axis(5), ...
+                'MinPeakProminence',35);
         
             K = length(pks)
             pix = remainingPoints;
@@ -99,11 +100,11 @@ function [clases]=iteraPoblacion(pathImg, train_lab, train_median_lab, clase, tr
                 [cie_ab, cie_la, cie_lb, pixels] = Pixel2DABLALB(dataPixeles);
                 sizelab = size(cie_ab, 1) * size(cie_ab, 2);
                 cie_ab_e = reshape(cie_ab, sizelab, 1)';
-                %cie_la_e = reshape(cie_la, sizelab, 1)';
-                %cie_lb_e = reshape(cie_lb, sizelab, 1)';
-                %seed_test_lab =  [cie_ab_e, cie_la_e, cie_lb_e];
-                seed_test_lab =  cie_ab_e;
-                [clase_lab] = KNNEvaluation(train_ab, seed_test_lab, clase, 51); 
+                cie_la_e = reshape(cie_la, sizelab, 1)';
+                cie_lb_e = reshape(cie_lb, sizelab, 1)';
+                seed_test_lab =  [cie_ab_e, cie_la_e, cie_lb_e];
+                %seed_test_lab =  cie_ab_e;
+                [clase_lab] = KNNEvaluation(train_lab, seed_test_lab, clase, 9); 
                 listClasses = [listClasses; clase_lab];
                 nameClassLandraces = strcat(nameClassLandraces, '-', clase_lab);
                 Final_Lab_Values = [Final_Lab_Values; dataPixeles];

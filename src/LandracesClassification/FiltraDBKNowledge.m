@@ -1,4 +1,4 @@
-function FiltraDBKNowledge(pathDB, nameDataSet)
+function FiltraDBKNowledge(pathDB, nameDataSet, nameMat)
 
    rootdir = pathDB;
    filename1 = strcat(rootdir,filesep, nameDataSet);
@@ -10,11 +10,15 @@ function FiltraDBKNowledge(pathDB, nameDataSet)
 
    devstd = std(train_ab);
    idx = devstd > 0;
-   datos = train_ab(:,idx); 
+   datos1h = train_ab(:,idx); 
     
-   clase = string(db.clase);
+   devstd = std(train_lab);
+   idx = devstd > 0;
+   datos3h = train_lab(:,idx); 
 
-   save('frijoldb.mat', "clase","datos");
+   clase = string(db.clase);
+   outputFile = strcat(pathDB, nameMat);
+   save(outputFile, "clase","datos1h", "datos3h");
 
 
 end
