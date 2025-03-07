@@ -138,9 +138,7 @@ function [clases]=iteraPoblacion(pathImg, train_lab, train_median_lab, clase, tr
         %[histLAB, histLCH] = BuildHistograms(Final_Lab_Values);
 
         %register = matfile(k);
-        s = struct("finalClass", finalClass, "populationName", populationName, ...
-            "Final_Lab_Values", Final_Lab_Values, "listClasses", listClasses);
-        save(rutadbFile,"-fromstruct",sLandraces);
+        parsave(rutadbFile,finalClass, populationName, Final_Lab_Values, listClasses);
         %save(rutadbFile, "finalClass", "populationName", "Final_Lab_Values", "listClasses");
     
     end
