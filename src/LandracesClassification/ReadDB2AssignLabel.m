@@ -15,7 +15,7 @@ function [clases]=iteraPoblacion(pathImg, train_lab, train_median_lab, clase, tr
        mkdir(folderClases)
     end
 
-    for ik = 1:length(matfile)             
+    parfor ik = 1:length(matfile)             
         archivo = matfile(ik).name;        % File name
         populationName = strrep(archivo,'.mat','');
         rutadbFile = strcat(folderClases,filesep, populationName,'.mat');
@@ -77,12 +77,11 @@ function [clases]=iteraPoblacion(pathImg, train_lab, train_median_lab, clase, tr
 
             v_x_axis = 1:25;
             [counts, edges] = histcounts(remainingPoints(:,1), 25);
-            %a = histogram(remainingPoints(:,1),25);
-            %figure();plot(a.Values);
+            % a = histogram(remainingPoints(:,1),25); figure();plot(a.Values);
          
             [pks, locs] = findpeaks(abs(counts), v_x_axis, ...
                 'MinPeakDistance',v_x_axis(5), ...
-                'MinPeakProminence',35);
+                'MinPeakProminence',20);
         
             K = length(pks)
             pix = remainingPoints;
@@ -104,7 +103,7 @@ function [clases]=iteraPoblacion(pathImg, train_lab, train_median_lab, clase, tr
                 cie_lb_e = reshape(cie_lb, sizelab, 1)';
                 seed_test_lab =  [cie_ab_e, cie_la_e, cie_lb_e];
                 %seed_test_lab =  cie_ab_e;
-                [clase_lab] = KNNEvaluation(train_lab, seed_test_lab, clase, 9); 
+                [clase_lab] = KNNEvaluation(train_lab, seed_test_lab, clase, 73); 
                 listClasses = [listClasses; clase_lab];
                 nameClassLandraces = strcat(nameClassLandraces, '-', clase_lab);
                 Final_Lab_Values = [Final_Lab_Values; dataPixeles];
@@ -139,7 +138,10 @@ function [clases]=iteraPoblacion(pathImg, train_lab, train_median_lab, clase, tr
         %[histLAB, histLCH] = BuildHistograms(Final_Lab_Values);
 
         %register = matfile(k);
-        save(rutadbFile, "finalClass", "populationName", "Final_Lab_Values");
+        s = struct("finalClass", finalClass, "populationName", populationName, ...
+            "Final_Lab_Values", Final_Lab_Values, "listClasses", listClasses);
+        save(rutadbFile,"-fromstruct",sLandraces);
+        %save(rutadbFile, "finalClass", "populationName", "Final_Lab_Values", "listClasses");
     
     end
 

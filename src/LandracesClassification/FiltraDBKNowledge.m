@@ -1,5 +1,5 @@
 function FiltraDBKNowledge(pathDB, nameDataSet, nameMat)
-
+   % FiltraDBKNowledge('../Images/DB/', 'db5knn.mat', 'frijol')
    rootdir = pathDB;
    filename1 = strcat(rootdir,filesep, nameDataSet);
    db = load(filename1,'-mat');
@@ -19,7 +19,6 @@ function FiltraDBKNowledge(pathDB, nameDataSet, nameMat)
    clase = string(db.clase);
    outputFile = strcat(pathDB, nameMat);
    save(outputFile, "clase","datos1h", "datos3h");
-
 
 end
 
