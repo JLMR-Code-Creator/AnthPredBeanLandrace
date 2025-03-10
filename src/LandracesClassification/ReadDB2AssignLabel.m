@@ -2,11 +2,11 @@ function ReadDB2AssignLabel(pathDB, pathImg1, nameDataSet)
    % firts step, read path of DB allocate
    [train_lab, train_median_lab, clase, train_ab] = loadTrainDataandClases(pathDB, nameDataSet);
    % Second step, load each landraces for classify grain and get superclase
-   [clases]=iteraPoblacion(pathImg1, train_lab, train_median_lab, clase, train_ab);
+   iteraPoblacion(pathImg1, train_lab, train_median_lab, clase, train_ab);
 
 end
 
-function [clases]=iteraPoblacion(pathImg, train_lab, train_median_lab, clase, train_ab)
+function iteraPoblacion(pathImg, train_lab, train_median_lab, clase, train_ab)
     %% loop to each landraces
     matfile = dir(strcat(pathImg,'Masks/*.mat'));  
     % checking if the dorectory exist
