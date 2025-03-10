@@ -122,6 +122,7 @@ function [clases]=iteraPoblacion(pathImg, train_lab, train_median_lab, clase, tr
         tblPercantage = {};
         for m = 1:length(ClassCategories)
             val = ClassCategories{m};
+            disp(val);
             quantitie = Classquatities(m);
             percentage = quantitie/sum(Classquatities)
             tblPercantage = [tblPercantage; m, quantitie, percentage];
