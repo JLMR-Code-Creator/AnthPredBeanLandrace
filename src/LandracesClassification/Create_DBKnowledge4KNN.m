@@ -2,7 +2,7 @@ function Create_DBKnowledge4KNN(pathDB)
 % Step 1: Load mat files that correspond to each landraces choosen to
 % create a db for knn algorithm
 rootdir = pathDB;
-filename1 = strcat(rootdir,filesep, 'db5knn.mat'); % Dataset for knn
+filename1 = strcat(rootdir,filesep, 'db4knn.mat'); % Dataset for knn
 if isfile(filename1)
     db = load(filename1,'-mat');
     train_3Hlab = db.train_lab;
@@ -17,7 +17,7 @@ else
     train_median_lab = [];
     for i = 1:numel(filelist)
         dbFilePath = filelist(i).folder;  % folder
-        if (contains(dbFilePath, 'Clases') || contains(dbFilePath, 'Variegado')|| contains(dbFilePath, 'Pink')) == 1
+        if (contains(dbFilePath, 'Clases') || contains(dbFilePath, 'Variegado')) == 1
             continue;
         end
         dbFileName =  filelist(i).name   % file
@@ -36,7 +36,7 @@ else
         clase =[clase; {dbMatFile.class}];
         train_median_lab = [train_median_lab;dbMatFile.mediana];
     end
-    urlDB = strcat(pathDB,filesep,'db5knn.mat');
+    urlDB = strcat(pathDB,filesep,'db4knn.mat');
     save(urlDB,"train_3Hlab","clase","train_median_lab", "train_1Hab");
 end
 end
