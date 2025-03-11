@@ -103,7 +103,7 @@ function iteraPoblacion(pathImg, train_lab, train_median_lab, clase, train_ab)
                 cie_lb_e = reshape(cie_lb, sizelab, 1)';
                 seed_test_lab =  [cie_ab_e, cie_la_e, cie_lb_e];
                 %seed_test_lab =  cie_ab_e;
-                [clase_lab] = KNNEvaluation(train_lab, seed_test_lab, clase, 73); 
+                [clase_lab] = KNNEvaluation(train_lab, seed_test_lab, clase); 
                 listClasses = [listClasses; clase_lab];
                 nameClassLandraces = strcat(nameClassLandraces, '-', clase_lab);
                 Final_Lab_Values = [Final_Lab_Values; dataPixeles];
@@ -146,33 +146,24 @@ function iteraPoblacion(pathImg, train_lab, train_median_lab, clase, train_ab)
 
 end % end function
 %% Algorithm of machine learning
-function clases = KNNEvaluation(train, test, labeltraining, kvector)
-    %= 9; %1, 3, 5 ,7,
+function clase = KNNEvaluation(train, test, labeltraining)
+   kvector= [9, 21, 31, 41, 51, 61, 71, 81, 91];
    distance = 'cityblock';
    ponderar = 'squaredinverse';
+   classes = cell(1, 9);
    for K=1:length(kvector) 
      Model = fitcknn(train, labeltraining, 'NumNeighbors', kvector(K), ...
                      'Distance', distance, 'DistanceWeight', ponderar);
-     clases = predict(Model, test);   
+     class = predict(Model, test);   
+     classes(1, K) = class;
    end  
+   %% Choose of class of maximal frecuence
+   classesCat = categorical(classes);
+   ClassCategories = categories(classesCat);
+   Classquatities = countcats(classesCat);
+   indx = find(max(Classquatities));
+   clase = ClassCategories{indx};
 end
-%% Building of histograms two-dimensionales
-function [histLAB, histLCH] = BuildHistograms(ROIpixelValues)
-    [cie_ab, cie_la, cie_lb, ~] = Pixel2DABLALB(ROIpixelValues);
-    sizelab = size(cie_ab, 1) * size(cie_ab, 2);
-    cie_ab_e = reshape(cie_ab, sizelab, 1)';
-    cie_la_e = reshape(cie_la, sizelab, 1)';
-    cie_lb_e = reshape(cie_lb, sizelab, 1)';
-    histLAB =  [cie_ab_e, cie_la_e, cie_lb_e];
-    
-    [cie_ch, cie_lc, cie_lh, ~] = Pixels2Hist2DCHLCLH(ROIpixelValues);
-    sizelch = size(cie_ch, 1) * size(cie_ch, 2);
-    cie_ch_e = reshape(cie_ch, sizelch, 1)';
-    cie_lc_e = reshape(cie_lc, sizelch, 1)';
-    cie_lh_e = reshape(cie_lh, sizelch, 1)';
-    histLCH =  [cie_ch_e, cie_lc_e, cie_lh_e];
-end
-
 
 %% Load mat file with color references
 function [train_lab, train_median_lab, clase, train_ab] = loadTrainDataandClases(pathDB, nameDataSet)
