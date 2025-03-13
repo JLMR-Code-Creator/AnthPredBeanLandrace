@@ -26,3 +26,50 @@ if strcmp(colorSpace, 'LAB')==1 %Cie lab
 end
 
 end
+
+function [ XTrain, YTrainLabel, XValidation, YValidationLabel, ...
+           XTest, YTestLabel] = Load3H2D(dbPopulations, pathDB, option)
+
+    XTrain = []; YTrainLabel = []; 
+    XValidation = []; YValidationLabel = [];   
+    XTest = []; YTestLabel = [];
+
+    for j = 1 : length(dbPopulations)
+        archivo = dbPopulations(j).name;        % Nombre del imagen
+        populationName = strrep(archivo,'.mat',''); % Nombre de la poblaci?n
+        disp([datestr(datetime), ' Procesando población ',populationName]);
+        load(strcat(pathDB,archivo)); % Carga el archivo de la m?scara
+
+
+        if strcmp(option, '--H3D') == 1
+            tv = cie_ab_e;
+        elseif strcmp(option, '--3H2D--LAB') == 1
+            tv = cat(3, cie_ab_e, cie_la_e, cie_lb_e);
+        elseif strcmp(option, '--3H2D--LCH') == 1
+            
+        end
+        XTrain = cat(4, XTrain, tv);
+        YTrainLabel = [YTrainLabel; valantocianinas];
+        XTrainPop = [XTrainPop;{populationName}];
+        XTrainColor = [XTrainColor;{color}];
+        
+        XValidation = cat(4, XValidation, tv);
+        YValidationLabel = [YValidationLabel;valantocianinas];
+        XValidationPop = [XValidationPop;{populationName}];
+        XValidationColor = [XValidationColor;{color}];
+        
+        if option == 1
+            tt = cie_ab_p;
+        else % '3H'
+            tt = cat(3, cie_ab_p, cie_la_p, cie_lb_p);
+        end
+
+        XTest =cat(4, XTest, tt);
+        YTestLabel = [YTestLabel; valantocianinas];
+        XTestPop = [XTestPop;{populationName}];
+        XTestColor = [XTestColor;{color}];       
+        
+                          
+    end % for
+
+end
