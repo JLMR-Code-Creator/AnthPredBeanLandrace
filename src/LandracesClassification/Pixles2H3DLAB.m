@@ -15,5 +15,17 @@ function [cielab] = Pixles2H3DLAB(pixels)
     toc
         
     cielab=cielab/rows;    
+    % elements = 256^3;
+    % H3DMxN = zeros(elements, 4);
+    % position = 1;
+    % for i = 1:256
+    %     for j=1:256
+    %         for k=1:256
+    %            H3DMxN(position,:) = [i,j,k,cielab(i, j, k)];
+    %            position = position + 1;
+    %         end
+    %     end
+    % end
+    
 end
 

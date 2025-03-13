@@ -1,12 +1,12 @@
 function ReadDB2AssignLabel(pathDB, pathImg1, nameDataSet)
    % firts step, read path of DB allocate
-   [train_lab, train_median_lab, clase, train_ab] = loadTrainDataandClases(pathDB, nameDataSet);
+   [train_lab, classe] = loadTrainDataandClases(pathDB, nameDataSet);
    % Second step, load each landraces for classify grain and get superclase
-   iteraPoblacion(pathImg1, train_lab, train_median_lab, clase, train_ab);
+   iteraPoblacion(pathImg1, train_lab, classe);
 
 end
 
-function iteraPoblacion(pathImg, train_lab, train_median_lab, clase, train_ab)
+function iteraPoblacion(pathImg, train_lab, classes)
     %% loop to each landraces
     matfile = dir(strcat(pathImg,'Masks/*.mat'));  
     % checking if the dorectory exist
@@ -14,8 +14,8 @@ function iteraPoblacion(pathImg, train_lab, train_median_lab, clase, train_ab)
     if ~exist(folderClases, 'dir')
        mkdir(folderClases)
     end
-
-    parfor ik = 1:length(matfile)             
+    [fitcknn_Models] = KNNModels(train_lab, classes);
+    for ik = 170:length(matfile)             
         archivo = matfile(ik).name;        % File name
         populationName = strrep(archivo,'.mat','');
         rutadbFile = strcat(folderClases,filesep, populationName,'.mat');
@@ -103,7 +103,8 @@ function iteraPoblacion(pathImg, train_lab, train_median_lab, clase, train_ab)
                 cie_lb_e = reshape(cie_lb, sizelab, 1)';
                 seed_test_lab =  [cie_ab_e, cie_la_e, cie_lb_e];
                 %seed_test_lab =  cie_ab_e;
-                [clase_lab] = KNNEvaluation(train_lab, seed_test_lab, clase); 
+                %[clase_lab] = KNNEvaluation(train_lab, seed_test_lab, clase); 
+                clase_lab = KNNPrediction(fitcknn_Models, seed_test_lab);
                 listClasses = [listClasses; clase_lab];
                 nameClassLandraces = strcat(nameClassLandraces, '-', clase_lab);
                 Final_Lab_Values = [Final_Lab_Values; dataPixeles];
@@ -146,17 +147,28 @@ function iteraPoblacion(pathImg, train_lab, train_median_lab, clase, train_ab)
 
 end % end function
 %% Algorithm of machine learning
-function clase = KNNEvaluation(train, test, labeltraining)
-   kvector= [9, 21, 31, 41, 51, 61, 71, 81, 91];
-   distance = 'cityblock';
-   ponderar = 'squaredinverse';
-   classes = cell(1, 9);
-   for K=1:length(kvector) 
-     Model = fitcknn(train, labeltraining, 'NumNeighbors', kvector(K), ...
-                     'Distance', distance, 'DistanceWeight', ponderar);
-     class = predict(Model, test);   
-     classes(1, K) = class;
-   end  
+function [fitcknn_Models] = KNNModels(trainData, labelTraining)
+kvector= [9, 21, 31, 41, 51 ];
+distance = 'cityblock';
+ponderar = 'squaredinverse';
+fitcknn_Models = [];
+    for K=1:length(kvector)
+        Model = ...
+            fitcknn(trainData, labelTraining, 'NumNeighbors', ...
+                    kvector(K), 'Distance', ...
+                    distance, 'DistanceWeight', ponderar);
+        s = struct('M', Model);
+        fitcknn_Models = [fitcknn_Models; s];
+    end
+end
+function clase = KNNPrediction(models, test)
+classes = cell(1, length(models));
+for i = 1:  length(models)
+    s = models(i);
+    Model = s.M;
+    class = predict(Model, test);   
+    classes(1, i) = class;
+end
    %% Choose of class of maximal frecuence
    classesCat = categorical(classes);
    ClassCategories = categories(classesCat);
@@ -165,15 +177,32 @@ function clase = KNNEvaluation(train, test, labeltraining)
    clase = ClassCategories{indx};
 end
 
+% function clase = KNNEvaluation(train, test, labeltraining)
+%    kvector= [9, 21, 31, 41, 51 ];
+%    distance = 'cityblock';
+%    ponderar = 'squaredinverse';
+%    classes = cell(1, 9);
+%    for K=1:length(kvector) 
+%      Model = fitcknn(train, labeltraining, 'NumNeighbors', kvector(K), ...
+%                      'Distance', distance, 'DistanceWeight', ponderar);
+%      class = predict(Model, test);   
+%      classes(1, K) = class;
+%    end  
+%    %% Choose of class of maximal frecuence
+%    classesCat = categorical(classes);
+%    ClassCategories = categories(classesCat);
+%    Classquatities = countcats(classesCat);
+%    indx = find(max(Classquatities));
+%    clase = ClassCategories{indx};
+% end
+
 %% Load mat file with color references
-function [train_lab, train_median_lab, clase, train_ab] = loadTrainDataandClases(pathDB, nameDataSet)
+function [train_lab, clase] = loadTrainDataandClases(pathDB, nameDataSet)
    rootdir = pathDB;
    filename1 = strcat(rootdir,filesep, nameDataSet);
    db = load(filename1,'-mat');
    train_lab = db.train_3Hlab;
    clase =  db.clase;
-   train_median_lab = db.train_median_lab;
-   train_ab = db.train_1Hab;
 end
 %% Cut ROI of seed of landraces
 function [subimage] =cutImage(Irgb,BI)

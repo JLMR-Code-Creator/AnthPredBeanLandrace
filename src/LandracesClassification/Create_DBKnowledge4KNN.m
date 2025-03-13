@@ -3,41 +3,47 @@ function Create_DBKnowledge4KNN(pathDB)
 % create a db for knn algorithm
 rootdir = pathDB;
 filename1 = strcat(rootdir,filesep, 'db4knn.mat'); % Dataset for knn
-if isfile(filename1)
-    db = load(filename1,'-mat');
-    train_3Hlab = db.train_lab;
-    clase =  db.clase;
-    train_median_lab = db.train_median_lab;
-else
+ 
+if ~isfile(filename1)
     filelist = dir(fullfile(rootdir, '**\*.mat'));
     filelist = filelist(~[filelist.isdir]);
+    folder_H3D = strcat(pathDB, '/DB_H3D_LAB');
+    if ~exist(folder_H3D, 'dir')
+        mkdir(folder_H3D)
+    end 
     train_3Hlab = [];
-    train_1Hab = [];
-    clase = [];
-    train_median_lab = [];
+    clases = [];
     for i = 1:numel(filelist)
         dbFilePath = filelist(i).folder;  % folder
-        if (contains(dbFilePath, 'Clases') || contains(dbFilePath, 'Variegado')) == 1
-            continue;
-        end
-        dbFileName =  filelist(i).name   % file
-        if contains(dbFileName, 'db') == 1
-            continue
-        end
+        dbFileName =  filelist(i).name;   % file
         dbFullPath =  strcat(dbFilePath, filesep, dbFileName);  % path
         dbMatFile = load(dbFullPath,'-mat');
-        sizelab = size(dbMatFile.cie_ab, 1) * size(dbMatFile.cie_ab, 2);
-        cie_ab_e = reshape(dbMatFile.cie_ab, sizelab, 1)';
-        cie_la_e = reshape(dbMatFile.cie_la, sizelab, 1)';
-        cie_lb_e = reshape(dbMatFile.cie_lb, sizelab, 1)';
+        %% Load Information
+        labPixels = dbMatFile.rawPixels;
+        processedPixels = dbMatFile.pixels; 
+        clase= dbMatFile.class;
+        %% Three dimensional histogram
+        [H3D] = Pixles2H3DLAB(labPixels);
+        %% Save in differents folders
+        dirFile = strcat(folder_H3D,'/', dbFileName);        
+        save(dirFile, 'H3D', 'clase');
+
+        %% Three two-dimensional histogram
+        [cie_ab, cie_la, cie_lb, pixels] = Pixel2DABLALB(labPixels);
+
+        sizelab = size(cie_ab, 1) * size(cie_ab, 2);
+        cie_ab_e = reshape(cie_ab, sizelab, 1)';
+        cie_la_e = reshape(cie_la, sizelab, 1)';
+        cie_lb_e = reshape(cie_lb, sizelab, 1)';
         train_lab = [cie_ab_e, cie_la_e, cie_lb_e];
         train_3Hlab = [train_3Hlab;train_lab];
-        train_1Hab = [train_1Hab;cie_ab_e];
-        clase =[clase; {dbMatFile.class}];
-        train_median_lab = [train_median_lab;dbMatFile.mediana];
+        clases =[clases; {clase}];
+        %train_1Hab = [train_1Hab;cie_ab_e];
+        %train_median_lab = [train_median_lab;dbMatFile.mediana];
     end
+    clase =  clases;
     urlDB = strcat(pathDB,filesep,'db4knn.mat');
-    save(urlDB,"train_3Hlab","clase","train_median_lab", "train_1Hab");
+    save(urlDB,"train_3Hlab","clase");
 end
 end
 
