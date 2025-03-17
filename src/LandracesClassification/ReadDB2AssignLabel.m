@@ -1,3 +1,7 @@
+%% Que se ordene por la clase de mayor frecuencia
+%% Analizar la poblaciones de color amarillo variegado.
+%% Verificar si es posible agrupar poblaciones por similitud.
+
 function ReadDB2AssignLabel(pathDB, pathImg1, nameDataSet)
    % firts step, read path of DB allocate
    [train_lab, classe] = loadTrainDataandClases(pathDB, nameDataSet);

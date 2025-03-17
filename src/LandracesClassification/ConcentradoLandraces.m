@@ -24,7 +24,7 @@ for i = 1:length(ClassCategories)
     quantitie = Classquatities(i);
     percentage = quantitie/sum(Classquatities);
     tblPercantage = [tblPercantage; {val}, i, quantitie, percentage];
-    disp(['#:',i,' Clase: ',val,' Cantidad: ', num2str(quantitie), ' %: ', num2str(percentage) ])
+    disp(['#:',num2str(i-1),' Clase: ',val,' Cantidad: ', num2str(quantitie), ' %: ', num2str(percentage) ])
     ruta = strcat(pathDB, '/tblPercantage.csv');
     writecell(tblPercantage,ruta,'Delimiter',',')
 end

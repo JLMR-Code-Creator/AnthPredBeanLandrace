@@ -21,7 +21,7 @@ function Dataset_Split(pathDB, file, option, nExecutions)
     nSeeds = length(dbPopulations);
     pTrain = ceil(nSeeds*0.7);
     pVal   = floor(nSeeds*0.15);
-    pTest  = nSeeds - (nSeeds*0.7-nSeeds*0.15);
+    pTest  = nSeeds - (pTrain+pVal);
     for i=1:nExecutions
 
         folder_corrida_3H2D_LAB = strcat(folder_3H2D_LAB, '/corrida_',num2str(i));
@@ -82,16 +82,17 @@ function SaveHistograms(dbPopulations, pathDB_3H2D_LAB, ...
         archivo = dbPopulations(j).name;            % Nombre del imagen
         populationName = strrep(archivo,'.mat',''); % Nombre de la poblaci?n
         disp([datestr(datetime), ' Procesando población ',populationName]);
-        load(strcat(pathDB,archivo)); % Carga el archivo de la m?scara         
+        load(strcat(dbPopulations(j).folder,'/',archivo)); % Carga el archivo de la m?scara         
         clase = finalClass;
         [H3D] = Pixles2H3DLAB(Final_Lab_Values);           
         dirFile = strcat(rutaH3D,'/', populationName);
-        save(dirFile, 'H3D', 'clase');
+        save(dirFile, 'H3D', 'clase', '-v7');
+        clase = cellstr(finalClass);
         [cie_ab, cie_la, cie_lb, pixels] = Pixel2DABLALB(Final_Lab_Values);
         dirFile = strcat(ruta3H2DLAB,'/', populationName);
-        save(dirFile, 'cie_ab', 'cie_la', 'cie_lb', 'clase');
+        save(dirFile, 'cie_ab', 'cie_la', 'cie_lb', 'clase',"populationName", '-v7');
         [cie_ch, cie_lc, cie_lh, c1] = Pixels2Hist2DCHLCLH(Final_Lab_Values); 
         dirFile = strcat(ruta3H2DLCH,'/', populationName);
-        save(dirFile, 'cie_ch', 'cie_lc', 'cie_lh', 'clase');
+        save(dirFile, 'cie_ch', 'cie_lc', 'cie_lh', 'clase', "populationName",'-v7');
     end % for
 end
