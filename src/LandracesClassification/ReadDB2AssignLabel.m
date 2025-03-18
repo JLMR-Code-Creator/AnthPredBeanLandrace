@@ -136,7 +136,7 @@ function iteraPoblacion(pathImg, train_lab, classes)
                 clase_lab = KNNPrediction(fitcknn_Models, seed_test_lab);
                 listClasses = [listClasses; clase_lab];              % label by different data color
                 nameClassLandraces = clase_lab;
-                Final_Lab_Values = [Final_Lab_Values; dataPixeles];  % Array of data colors
+                Final_Lab_Values = [Final_Lab_Values; remainingPoints];  % Array of data colors
 
             end
             listClassesByLandraces = [listClassesByLandraces; nameClassLandraces]; % Labels by seed           
