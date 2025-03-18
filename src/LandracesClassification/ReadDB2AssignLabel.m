@@ -19,7 +19,7 @@ function iteraPoblacion(pathImg, train_lab, classes)
        mkdir(folderClases)
     end
     [fitcknn_Models] = KNNModels(train_lab, classes);
-    for ik = 170:length(matfile)             
+    for ik = 1:length(matfile)             
         archivo = matfile(ik).name;        % File name
         populationName = strrep(archivo,'.mat','');
         rutadbFile = strcat(folderClases,filesep, populationName,'.mat');
@@ -30,7 +30,6 @@ function iteraPoblacion(pathImg, train_lab, classes)
         nombre=strcat(pathImg,'Masks/');
         L = load(strcat(nombre,populationName)); % load file mask
         Mask = L.Mask;
-        disp([datestr(datetime), ' Procesando población ',populationName]);
         % Read each seed for classify
         Mask = ~Mask; % We verify that ROI has zero values for the correct labeled  
         % Clean up small groups pixels
@@ -47,8 +46,6 @@ function iteraPoblacion(pathImg, train_lab, classes)
         I = imread(strcat(pathImg,populationName,'.tif'));
         [I_Lab] = RGB2PCS(I, pathImg, strcat(populationName, '.tif'));
         I = uint8(I/256); %% 16 to 8 bits 
-        listClasses = {};
-        Final_Lab_Values = []; %para el almacenamiento del conjunto de pixels
         se = strel("disk",15);
         M = Mask;
         Mask = imerode(M,se);
@@ -59,8 +56,13 @@ function iteraPoblacion(pathImg, train_lab, classes)
         if ~exist(folderLandraces, 'dir')
             mkdir(folderLandraces)
         end
-         
-        for i3=1:N % In each grain get the class
+
+        listClasses = {}; % All labesl
+        Final_Lab_Values = []; % All pixels
+        listClassesByLandraces = {}; % for label by seed
+
+
+        for i3 = 1 : N  % In each grain get the class
             seeds = 1:N;
             seedValue =  i3;
             seeds(seeds==seedValue) = [];
@@ -73,6 +75,7 @@ function iteraPoblacion(pathImg, train_lab, classes)
 
             Mask_tmp = ~Mask_tmp;
             [Lab_Values,~ ]= ROILab(I_Lab, Mask_tmp);
+            nameClassLandraces = '';
 
             % remove outliers in 3D point data of seed bean
             distance = sqrt(sum(Lab_Values.^2, 2));
@@ -88,68 +91,97 @@ function iteraPoblacion(pathImg, train_lab, classes)
                 'MinPeakProminence',20);
         
             K = length(pks)
-            pix = remainingPoints;
-            GMModel = fitgmdist(pix, K);
+            if (K > 1) 
+                pix = remainingPoints;
+                GMModel = fitgmdist(pix, K);
+                idx = cluster(GMModel,pix);
+                unicos = unique(idx);
+                [~, idxCategories] = sortArrayElements(idx);
+                tmpName = {};
+                totalPixels = size(remainingPoints, 1); % size all pixels
+                %% Pixels distribution
+                for i=1:length(unicos)
+                    valIdx = str2double(idxCategories{i});
+                    dataPixeles = remainingPoints(idx==valIdx, :);
+                    if (size(dataPixeles, 1) / totalPixels) <= 0.10
+                        continue;
+                    end
+                    [cie_ab, cie_la, cie_lb, ~] = Pixel2DABLALB(dataPixeles);
+                    sizelab = size(cie_ab, 1) * size(cie_ab, 2);
+                    cie_ab_e = reshape(cie_ab, sizelab, 1)';
+                    cie_la_e = reshape(cie_la, sizelab, 1)';
+                    cie_lb_e = reshape(cie_lb, sizelab, 1)';
+                    seed_test_lab =  [cie_ab_e, cie_la_e, cie_lb_e];
+                    clase_lab = KNNPrediction(fitcknn_Models, seed_test_lab);                    
+                    Final_Lab_Values = [Final_Lab_Values; dataPixeles]; % Array of data colors
+                    %% If class does not exist                       
+                    if ~any(strcmp(tmpName,clase_lab)) 
+                        tmpName = [tmpName; clase_lab];
+                        if isempty(nameClassLandraces)
+                           nameClassLandraces = strcat(nameClassLandraces, clase_lab);
+                        else
+                            nameClassLandraces = strcat(nameClassLandraces, '-', clase_lab);
+                        end
 
-            idx = cluster(GMModel,pix);
-            unicos = unique(idx)
-            nameClassLandraces = '';
-            totalPixels = size(remainingPoints, 1);
-            for i=1:length(unicos)
-                dataPixeles = remainingPoints(idx==i, :);
-                if (size(dataPixeles, 1) / totalPixels)<=.10
-                    continue;
-                end
-                [cie_ab, cie_la, cie_lb, pixels] = Pixel2DABLALB(dataPixeles);
+                        listClasses = [listClasses; clase_lab]; 
+                    end               
+                end % end for
+            else % Only one distribution
+                [cie_ab, cie_la, cie_lb, ~] = Pixel2DABLALB(remainingPoints);
                 sizelab = size(cie_ab, 1) * size(cie_ab, 2);
                 cie_ab_e = reshape(cie_ab, sizelab, 1)';
                 cie_la_e = reshape(cie_la, sizelab, 1)';
                 cie_lb_e = reshape(cie_lb, sizelab, 1)';
                 seed_test_lab =  [cie_ab_e, cie_la_e, cie_lb_e];
-                %seed_test_lab =  cie_ab_e;
-                %[clase_lab] = KNNEvaluation(train_lab, seed_test_lab, clase); 
                 clase_lab = KNNPrediction(fitcknn_Models, seed_test_lab);
-                listClasses = [listClasses; clase_lab];
-                nameClassLandraces = strcat(nameClassLandraces, '-', clase_lab);
-                Final_Lab_Values = [Final_Lab_Values; dataPixeles];
+                listClasses = [listClasses; clase_lab];              % label by different data color
+                nameClassLandraces = clase_lab;
+                Final_Lab_Values = [Final_Lab_Values; dataPixeles];  % Array of data colors
+
             end
-            %% Guardar la imagen de la semilla para validar etiqueta
-              fileName = strcat(folderLandraces,'/',num2str(i3), string(nameClassLandraces));  
-              Mask_tmp = ~Mask_tmp;
-              [subimage] = cutImage(I,uint8(Mask_tmp));
-              imwrite(subimage,strcat(fileName,".png"));  
+            listClassesByLandraces = [listClassesByLandraces; nameClassLandraces]; % Labels by seed           
+            fileName = strcat(folderLandraces,'/',num2str(i3), string(nameClassLandraces));  
+            Mask_tmp = ~Mask_tmp;
+            [subimage] = cutImage(I,uint8(Mask_tmp));
+            imwrite(subimage,strcat(fileName,".png"));  
         end % for i3
         % Get class label using K-NN algorith
-        % quantification of grain for coloration
-        categoricItems = categorical(listClasses);
-        ClassCategories = categories(categoricItems);
-        Classquatities = countcats(categoricItems);
-        tblPercantage = {};
-        for m = 1:length(ClassCategories)
-            val = ClassCategories{m};
-            disp(val);
-            quantitie = Classquatities(m);
-            percentage = quantitie/sum(Classquatities)
-            tblPercantage = [tblPercantage; m, quantitie, percentage];
-        end
+        % quantification of grain for coloration        
+        % [Classquatities, ClassCategories] = sortArrayElements(listClasses);
+        % tblLbl = {};
+        % for m = 1:length(ClassCategories)
+        %     val = ClassCategories{m};
+        %     disp(val);
+        %     quantitie = Classquatities(m);
+        %     percentage = quantitie/sum(Classquatities)
+        %     tblLbl = [tblLbl; val ,{m}, {quantitie}, {percentage}];
+        % end
+        % 
+        % [Quatities, Categories] = sortArrayElements(listClassesByLandraces);
+        % tblSeeds = {};
+        % for m = 1:length(Categories)
+        %     val = Categories{m};
+        %     disp(val);
+        %     quant = Quatities(m);
+        %     percentage = quant/sum(Quatities);
+        %     tblSeeds = [tblSeeds; val ,{m}, {quant}, {percentage}];
+        % end
 
-        finalClass =  unique(listClasses);
-        finalClass = string(finalClass);
-        finalClass = sort(finalClass,"ascend");
-        finalClass = strjoin(finalClass);
-        %% Creación del histograma de la población
-        %  será creado un archivo que contendrá triple histograma
-        %  el nombre de archivo de la población, el histograma, la etiqueta de color  
-        % Las carpetas de almacenado de histogramas será HistLAB HistLCH
-        %[histLAB, histLCH] = BuildHistograms(Final_Lab_Values);
-
-        %register = matfile(k);
-        parsave(rutadbFile,finalClass, populationName, Final_Lab_Values, listClasses);
+       
+        parsave(rutadbFile, populationName, Final_Lab_Values, listClasses, listClassesByLandraces);
         %save(rutadbFile, "finalClass", "populationName", "Final_Lab_Values", "listClasses");
     
     end
 
 end % end function
+function [Classquatities, ClassCategories] = sortArrayElements(idx)
+    categoricItems = categorical(idx);
+    ClassCategories = categories(categoricItems);
+    Classquatities = countcats(categoricItems);
+    [Xsorted,Indx] = sort(Classquatities, "descend");
+    Classquatities = Xsorted;
+    ClassCategories = ClassCategories(Indx);
+end
 %% Algorithm of machine learning
 function [fitcknn_Models] = KNNModels(trainData, labelTraining)
 kvector= [9, 21, 31, 41, 51 ];
