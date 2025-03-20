@@ -3,6 +3,7 @@
 %% Verificar si es posible agrupar poblaciones por similitud.
 
 function ReadDB2AssignLabel(pathDB, pathImg1, nameDataSet)
+%% Firts step
    % firts step, read path of DB allocate
    [train_lab, classe] = loadTrainDataandClases(pathDB, nameDataSet);
    % Second step, load each landraces for classify grain and get superclase
@@ -19,7 +20,8 @@ function iteraPoblacion(pathImg, train_lab, classes)
        mkdir(folderClases)
     end
     [fitcknn_Models] = KNNModels(train_lab, classes);
-    for ik = 1:length(matfile)             
+    for ik = 1:length(matfile)
+    %for ik=length(matfile):-1:1
         archivo = matfile(ik).name;        % File name
         populationName = strrep(archivo,'.mat','');
         rutadbFile = strcat(folderClases,filesep, populationName,'.mat');
