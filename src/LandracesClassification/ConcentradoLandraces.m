@@ -1,6 +1,5 @@
 function ConcentradoLandraces(pathDB, folderImage1, folderImage2)
-%CONCENTRADOLANDRACES : Function for obtained the color labels of each
-%landraces
+%CONCENTRADOLANDRACES : Function for obtained the color labels of each landraces
 matfile = dir(strcat(pathDB,'/*.mat'));
 listClasses = cell(1, length(matfile));
 listNames = cell(1,length(matfile));

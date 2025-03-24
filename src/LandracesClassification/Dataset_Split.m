@@ -1,98 +1,80 @@
-function Dataset_Split(pathDB, file, option, nExecutions)
-    %% function for split data en training, validation, nd testing
+function Dataset_Split(pathDB1, pathDB2, folderMat1, folderMat2, nExecutions)
+    %% fourth (4th) function for split data en training, and testing
+    %Dataset_Split('../Images/LANDRACES/Clases/3H2D_LAB_E210/Histograms/', 
+    % '../Images/LANDRACES/Clases/3H2D_LCH_E210/Histograms/', 
+    % '../Images/LANDRACES/Clases/3H2D_LAB_E210/', 
+    % '../Images/LANDRACES/Clases/3H2D_LCH_E210/', 30)
     % Load datas
-    dbPopulations = dir(strcat(pathDB,file)); % Load data
-    folder_3H2D_LAB = strcat(pathDB, '3H2D_LAB');
-    if ~exist(folder_3H2D_LAB, 'dir')
-       mkdir(folder_3H2D_LAB)
-    end
-    folder_3H2D_LCH = strcat(pathDB, '3H2D_LCH');
-    if ~exist(folder_3H2D_LCH, 'dir')
-       mkdir(folder_3H2D_LCH)
-    end
-    folder_H3D = strcat(pathDB, '1H3D');
-    if ~exist(folder_H3D, 'dir')
-       mkdir(folder_H3D)
-    end
+    dbFolders = dir(strcat(pathDB1)); % Load data
+    dbFolders(strcmp({dbFolders.name}, '.'))  = [];
+    dbFolders(strcmp({dbFolders.name}, '..'))  = [];
 
+    dbFolders2 = dir(strcat(pathDB2)); % Load data
+    dbFolders2(strcmp({dbFolders2.name}, '.'))  = [];
+    dbFolders2(strcmp({dbFolders2.name}, '..'))  = [];
     
-    elements = 1 : length(dbPopulations);
-    %matrixPermutations = zeros(nExecutions, length(elements));
-    nSeeds = length(dbPopulations);
-    pTrain = ceil(nSeeds*0.7);
-    pVal   = floor(nSeeds*0.15);
-    pTest  = nSeeds - (pTrain+pVal);
-    for i=1:nExecutions
 
-        folder_corrida_3H2D_LAB = strcat(folder_3H2D_LAB, '/corrida_',num2str(i));
-        if ~exist(folder_corrida_3H2D_LAB, 'dir')
-            mkdir(folder_corrida_3H2D_LAB)
+    for i_=1:nExecutions
+
+        folder_corrida_folderMat1 = strcat(folderMat1, 'corridas/corrida_',num2str(i_));
+        if ~exist(folder_corrida_folderMat1, 'dir')
+            mkdir(folder_corrida_folderMat1)
         end
 
-        folder_corrida_3H2D_LCH = strcat(folder_3H2D_LCH, '/corrida_',num2str(i));
-        if ~exist(folder_corrida_3H2D_LCH, 'dir')
-            mkdir(folder_corrida_3H2D_LCH)
+        folder_corrida_folderMat2 = strcat(folderMat2, 'corridas/corrida_',num2str(i_));
+        if ~exist(folder_corrida_folderMat2, 'dir')
+            mkdir(folder_corrida_folderMat2)
         end
 
-        folder_corrida_H3D = strcat(folder_H3D, '/corrida_',num2str(i));
-        if ~exist(folder_corrida_H3D, 'dir')
-            mkdir(folder_corrida_H3D)
-        end
+         %% For each folder of color group
+         for j_=1:length(dbFolders)
+             pathLandraces = dbFolders(j_).name;
+             pathFiles1 = dir(strcat(pathDB1, '/', pathLandraces,'/*.mat'));
+             pathFiles2 = dir(strcat(pathDB2, '/', pathLandraces,'/*.mat'));
+             elements = 1 : length(pathFiles1);
+             nSeeds = length(elements);
+             pTrain = ceil(nSeeds*0.5);
+             %pTest  = nSeeds - (pTrain);
 
-        shuffled = elements(randperm(length(elements)));
+            shuffled = elements(randperm(length(elements)));
+            %% Train
+            setSeeds = shuffled(1:pTrain);
+            
+            dataTrain = pathFiles1(setSeeds);
+            SaveHistograms(dataTrain, folder_corrida_folderMat1, strcat('train/',pathLandraces));
 
-        %% Train
-        setSeeds = shuffled(1:pTrain);
-        dataTrain = dbPopulations(setSeeds);
-        SaveHistograms(dataTrain, folder_corrida_3H2D_LAB, ...
-            folder_corrida_3H2D_LCH, folder_corrida_H3D, 'train');
-        shuffled(1:pTrain) = [];
-        %% Validation
-        setSeeds = shuffled(1:pVal);
-        dataVal   = dbPopulations(setSeeds);
-        SaveHistograms(dataVal, folder_corrida_3H2D_LAB, ...
-            folder_corrida_3H2D_LCH, folder_corrida_H3D, 'validation');
-        shuffled(1:pVal) = [];
-        %% Test
-        setSeeds = shuffled(1:end);
-        dataTest  = dbPopulations(setSeeds);
-        SaveHistograms(dataTest, folder_corrida_3H2D_LAB, ...
-            folder_corrida_3H2D_LCH, folder_corrida_H3D, 'test');
-        shuffled(1:end) = [];
-    end
+
+            dataTrain2 = pathFiles2(setSeeds);
+            SaveHistograms(dataTrain2, folder_corrida_folderMat2, strcat('train/',pathLandraces));
+
+            shuffled(1:pTrain) = [];
+            %% Test
+            setSeeds = shuffled(1:end);
+
+            dataTest  = pathFiles1(setSeeds);
+            SaveHistograms(dataTest, folder_corrida_folderMat1, strcat('test/',pathLandraces));
+
+            dataTest2 = pathFiles2(setSeeds);
+            SaveHistograms(dataTest2, folder_corrida_folderMat2, strcat('test/',pathLandraces));
+
+            shuffled(1:end) = [];             
+         end
+    end % Executions
 end
 
-function SaveHistograms(dbPopulations, pathDB_3H2D_LAB, ...
-    pathDB_3H2D_LCH, pathDB_H3D, folder)
+function SaveHistograms(dbPopulations, pathDB_3H2D, folder)
 
-    rutaH3D = strcat(pathDB_H3D,'/',folder);
-    if ~exist(rutaH3D, 'dir')
-        mkdir(rutaH3D)
-    end
-    ruta3H2DLAB = strcat(pathDB_3H2D_LAB,'/',folder);
-    if ~exist(ruta3H2DLAB, 'dir')
-        mkdir(ruta3H2DLAB)
+    ruta3H2D = strcat(pathDB_3H2D,'/',folder);
+    if ~exist(ruta3H2D, 'dir')
+        mkdir(ruta3H2D)
     end    
-    ruta3H2DLCH = strcat(pathDB_3H2D_LCH,'/',folder);
-    if ~exist(ruta3H2DLCH, 'dir')
-        mkdir(ruta3H2DLCH)
-    end  
 
-    for j = 1 : length(dbPopulations)
-        archivo = dbPopulations(j).name;            % Nombre del imagen
-        populationName = strrep(archivo,'.mat',''); % Nombre de la poblaci?n
-        disp([datestr(datetime), ' Procesando población ',populationName]);
-        load(strcat(dbPopulations(j).folder,'/',archivo)); % Carga el archivo de la m?scara         
-        clase = finalClass;
-        [H3D] = Pixles2H3DLAB(Final_Lab_Values);           
-        dirFile = strcat(rutaH3D,'/', populationName);
-        save(dirFile, 'H3D', 'clase', '-v7');
-        clase = cellstr(finalClass);
-        [cie_ab, cie_la, cie_lb, pixels] = Pixel2DABLALB(Final_Lab_Values);
-        dirFile = strcat(ruta3H2DLAB,'/', populationName);
-        save(dirFile, 'cie_ab', 'cie_la', 'cie_lb', 'clase',"populationName", '-v7');
-        [cie_ch, cie_lc, cie_lh, c1] = Pixels2Hist2DCHLCLH(Final_Lab_Values); 
-        dirFile = strcat(ruta3H2DLCH,'/', populationName);
-        save(dirFile, 'cie_ch', 'cie_lc', 'cie_lh', 'clase', "populationName",'-v7');
+    for i_ = 1 : length(dbPopulations)
+        folderLandraces = dbPopulations(i_).folder;
+        landraces = dbPopulations(i_).name;
+
+        fileMat = fullfile(strcat(folderLandraces,'/',landraces));
+        fileOut = fullfile(strcat(ruta3H2D, '/'));
+        copyfile(fileMat, fileOut);
     end % for
 end
