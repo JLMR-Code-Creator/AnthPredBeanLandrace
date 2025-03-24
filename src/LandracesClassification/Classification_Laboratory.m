@@ -2,6 +2,7 @@ function Classification_Laboratory(folderRuns, folderOut,cs, epoch)
 % the code is for experimentation of classification task, 
 % the dataset used correspond to landraces of differents colorations
 % ( Homogeneous and heterogeneous)
+%Classification_Laboratory('../Images/LANDRACES/Clases/3H2D_LAB_E210/corridas','../Images/LANDRACES/Clases/3H2D_LAB_E210/','LAB', 300)
 
 %% Reading folder
 dbFoldersRuns = dir(folderRuns); 

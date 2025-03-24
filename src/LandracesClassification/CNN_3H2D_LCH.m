@@ -71,9 +71,10 @@ function CNN_3H2D_LCH(XTrainLCH, YTrainLCH, XTestLCH, YTestLCH, ...
     plot(lgraph);
     % Second level (connections) 1 11 100
     lgraph = connectLayers(lgraph,'maxpool_1','conv_3');
-    lgraph = connectLayers(lgraph,'maxpool_1','conv_4');
-    lgraph = connectLayers(lgraph,'maxpool_1','conv_5');
-    lgraph = connectLayers(lgraph,'avgpool_2','conv_4');
+    lgraph = connectLayers(lgraph,'conv_3','add/in3');
+    lgraph = connectLayers(lgraph,'maxpool_1','conv_4/in4');
+    lgraph = connectLayers(lgraph,'maxpool_1','conv_5/in4');
+    lgraph = connectLayers(lgraph,'avgpool_2','conv_4/in4');
     figure
     plot(lgraph);
 
