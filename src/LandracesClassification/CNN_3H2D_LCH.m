@@ -6,10 +6,10 @@ function CNN_3H2D_LCH(XTrainLCH, YTrainLCH, XTestLCH, YTestLCH, ...
     gpurng(0, "threefry")
     
     XTrain = XTrainLCH;
-    YTrain = YTrainLCH;
+    YTrain = categorical(YTrainLCH);
 
     XTest = XTestLCH;
-    YTest = YTestLCH;
+    YTest = categorical(YTestLCH);
 
     % The next text was obtained from DeepGa Algorithm
     % Firts level
@@ -121,9 +121,9 @@ function CNN_3H2D_LCH(XTrainLCH, YTrainLCH, XTestLCH, YTestLCH, ...
     plot(lgraph)
     ModelNet = trainNetwork(XTrain, YTrain, lgraph, options);
     
-    YPredTrain = predict(ModelNet, XTrain);
+    YPredTrain = classify(ModelNet, XTrain);
     
-    YPredTest = predict(ModelNet, XTest);
+    YPredTest = classify(ModelNet, XTest);
     accuracy = mean(YPredTest == YTest)
     save(filenamemat, 'XTrain',   'YTrain', 'XTest', 'YTest', 'ModelNet', "CNN", "accuracy");
 
