@@ -6,10 +6,10 @@ function CNN_3H2D_LCH(XTrainLCH, YTrainLCH, XTestLCH, YTestLCH, ...
     gpurng(0, "threefry")
     
     XTrain = XTrainLCH;
-    YTrain = categorical(YTrainLCH);
+    YTrain = YTrainLCH;
 
     XTest = XTestLCH;
-    YTest = categorical(YTestLCH);
+    YTest = YTestLCH;
 
     % The next text was obtained from DeepGa Algorithm
     % Firts level
@@ -81,7 +81,7 @@ function CNN_3H2D_LCH(XTrainLCH, YTrainLCH, XTestLCH, YTestLCH, ...
         fullyConnectedLayer(256,"Name","fc_256n")
         fullyConnectedLayer(12,"Name","numClasses")
         softmaxLayer("Name","softmax")
-        classificationLayer("Name","classoutput")];
+        class];
         CNN = addLayers(CNN,tempCNN);
         CNN = connectLayers(CNN,"maxpool_1","conv_2");
     CNN = connectLayers(CNN,"maxpool_1","resize-1a4");
@@ -112,7 +112,8 @@ function CNN_3H2D_LCH(XTrainLCH, YTrainLCH, XTestLCH, YTestLCH, ...
         'ValidationPatience',10, ... % early stopping
         'ValidationData',{XTrain, YTrain},...
         'Plots','training-progress',...
-        'MaxEpochs', epoch,...       %'ExecutionEnvironment','parallel',...
+        'MaxEpochs', epoch,...  
+        'ExecutionEnvironment','parallel',...
         'Verbose', true,...
         'Plots','training-progress');
     lgraph = layerGraph(CNN);
@@ -120,9 +121,9 @@ function CNN_3H2D_LCH(XTrainLCH, YTrainLCH, XTestLCH, YTestLCH, ...
     plot(lgraph)
     ModelNet = trainNetwork(XTrain, YTrain, lgraph, options);
     
-    YPredTrain = classify(ModelNet, XTrain);
+    YPredTrain = predict(ModelNet, XTrain);
     
-    YPredTest = classify(ModelNet, XTest);
+    YPredTest = predict(ModelNet, XTest);
     accuracy = mean(YPredTest == YTest)
     save(filenamemat, 'XTrain',   'YTrain', 'XTest', 'YTest', 'ModelNet', "CNN", "accuracy");
 
