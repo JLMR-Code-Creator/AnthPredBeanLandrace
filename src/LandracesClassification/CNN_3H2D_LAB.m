@@ -46,7 +46,9 @@ function CNN_3H2D_LAB(XTrainLAB, YTrainLAB, XTestLAB, YTestLAB, ...
     
     finalLayers = [
         fullyConnectedLayer(128,'Name','fc_128n')
+        %reluLayer("Name","relu_128")
         fullyConnectedLayer(12,'Name','numClasses') %number of classes of the responses (12)
+        %reluLayer("Name","relu_12")
         softmaxLayer('Name','softmax')
         classificationLayer('Name','classOutput')
         ]
@@ -75,9 +77,9 @@ function CNN_3H2D_LAB(XTrainLAB, YTrainLAB, XTestLAB, YTestLAB, ...
     
     net = trainNetwork(XTrain, YTrain, lgraph, options);
     
-    YPredTrain = predict(net, XTrain);
+    YPredTrain = classify(net, XTrain);
     
-    YPredTest = predict(net, XTest);
+    YPredTest = classify(net, XTest);
     accuracy = mean(YPredTest == YTest)
     save(filenamemat, 'XTrain',   'YTrain', 'XTest', 'YTest', 'net', "lgraph","accuracy");
 

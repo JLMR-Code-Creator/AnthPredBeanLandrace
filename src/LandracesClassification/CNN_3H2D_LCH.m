@@ -27,74 +27,77 @@ function CNN_3H2D_LCH(XTrainLCH, YTrainLCH, XTestLCH, YTestLCH, ...
     %INPUT = imageInputLayer(imageSize, 'Name','input');
     % sizeFilter = [4 4];
     % filtros  = 16;
-    CNN = dlnetwork; % empty network
-    tempCNN = [
+    CNNet = dlnetwork; % empty network
+    tempNet = [
         imageInputLayer([361 361 3],"Name","input")
         convolution2dLayer([4 4],16,"Name","conv_1","Padding",[1 1 1 1])
         batchNormalizationLayer("Name","BN_1")
         reluLayer("Name","relu_1")
         maxPooling2dLayer([3 3],"Name","maxpool_1","Stride",[2 2])];
-    CNN = addLayers(CNN,tempCNN);
+    CNNet = addLayers(CNNet,tempNet);
 
-    tempCNN = [
+    tempNet = [
         convolution2dLayer([2 2],8,"Name","conv_2","Padding",[1 1 1 1])
         batchNormalizationLayer("Name","BN_2")
         reluLayer("Name","relu_2")
         averagePooling2dLayer([3 3],"Name","avgpool_2","Stride",[2 2])];
-    CNN = addLayers(CNN,tempCNN);
+    CNNet = addLayers(CNNet,tempNet);
 
-    tempCNN = resize2dLayer("Name","resize-1a4","GeometricTransformMode","half-pixel","Method","nearest","NearestRoundingMode","round","OutputSize",[88 88]);
-    CNN = addLayers(CNN,tempCNN);
+    tempNet = maxPooling2dLayer([3 3],"Name","maxpool_1a3","Stride",[2 2]);
+    CNNet = addLayers(CNNet,tempNet);
 
-    tempCNN = resize2dLayer("Name","resize-1a2","GeometricTransformMode","half-pixel","Method","nearest","NearestRoundingMode","round","OutputSize",[89 89]);
-    CNN = addLayers(CNN,tempCNN);
-
-    tempCNN = [
+    tempNet = [
         depthConcatenationLayer(2,"Name","concat_1")
         convolution2dLayer([4 4],8,"Name","conv_3","Padding",[1 1 1 1])
         batchNormalizationLayer("Name","BN_3")
         reluLayer("Name","relu_3")];
-    CNN = addLayers(CNN,tempCNN);
-    
-    tempCNN = resize2dLayer("Name","resize-2a4","GeometricTransformMode","half-pixel","Method","nearest","NearestRoundingMode","round","OutputSize",[88 88]);
-    CNN = addLayers(CNN,tempCNN);
-    
-    tempCNN = [
+    CNNet = addLayers(CNNet,tempNet);
+
+    tempNet = maxPooling2dLayer([4 4],"Name","maxpool_2a4","Padding",[1 1 1 1]);
+    CNNet = addLayers(CNNet,tempNet);
+
+    tempNet = maxPooling2dLayer([4 4],"Name","maxpool_1a4","Stride",[2 2]);
+    CNNet = addLayers(CNNet,tempNet);
+
+    tempNet = [
         depthConcatenationLayer(3,"Name","concat_2")
         convolution2dLayer([3 3],128,"Name","conv_4","Padding",[1 1 1 1])
         batchNormalizationLayer("Name","BN_4")
         reluLayer("Name","relu_4")
         maxPooling2dLayer([2 2],"Name","maxpool_4","Stride",[2 2])];
-    CNN = addLayers(CNN,tempCNN);
-    
-    tempCNN = resize2dLayer("Name","resize-1a5","GeometricTransformMode","half-pixel","Method","nearest","NearestRoundingMode","round","OutputSize",[44 44]);
-    CNN = addLayers(CNN,tempCNN);
+    CNNet = addLayers(CNNet,tempNet);
 
-    tempCNN = [
+    tempNet = maxPooling2dLayer([4 4],"Name","maxpool_1a5","Stride",[4 4]);
+    CNNet = addLayers(CNNet,tempNet);
+
+    tempNet = [
         depthConcatenationLayer(2,"Name","concat_3")
         convolution2dLayer([3 3],8,"Name","conv_5","Padding",[1 1 1 1])
         batchNormalizationLayer("Name","BN_5")
         reluLayer("Name","relu_5")
         maxPooling2dLayer([3 3],"Name","maxpool_5","Stride",[2 2])
         fullyConnectedLayer(16,"Name","fc_16n")
+        reluLayer("Name","relu")
         fullyConnectedLayer(128,"Name","fc_128n")
+        reluLayer("Name","relu_6")
         fullyConnectedLayer(256,"Name","fc_256n")
+        reluLayer("Name","relu_7")
         fullyConnectedLayer(12,"Name","numClasses")
         softmaxLayer("Name","softmax")
         classificationLayer("Name","classoutput")];
-        CNN = addLayers(CNN,tempCNN);
-        CNN = connectLayers(CNN,"maxpool_1","conv_2");
-    CNN = connectLayers(CNN,"maxpool_1","resize-1a4");
-    CNN = connectLayers(CNN,"maxpool_1","resize-1a2");
-    CNN = connectLayers(CNN,"maxpool_1","resize-1a5");
-    CNN = connectLayers(CNN,"avgpool_2","concat_1/in1");
-    CNN = connectLayers(CNN,"avgpool_2","resize-2a4");
-    CNN = connectLayers(CNN,"resize-1a4","concat_2/in1");
-    CNN = connectLayers(CNN,"resize-1a2","concat_1/in2");
-    CNN = connectLayers(CNN,"relu_3","concat_2/in2");
-    CNN = connectLayers(CNN,"resize-2a4","concat_2/in3");
-    CNN = connectLayers(CNN,"maxpool_4","concat_3/in1");
-    CNN = connectLayers(CNN,"resize-1a5","concat_3/in2");
+    CNNet = addLayers(CNNet,tempNet);
+    CNNet = connectLayers(CNNet,"maxpool_1","conv_2");
+    CNNet = connectLayers(CNNet,"maxpool_1","maxpool_1a3");
+    CNNet = connectLayers(CNNet,"maxpool_1","maxpool_1a4");
+    CNNet = connectLayers(CNNet,"maxpool_1","maxpool_1a5");
+    CNNet = connectLayers(CNNet,"avgpool_2","concat_1/in1");
+    CNNet = connectLayers(CNNet,"avgpool_2","maxpool_2a4");
+    CNNet = connectLayers(CNNet,"maxpool_1a3","concat_1/in2");
+    CNNet = connectLayers(CNNet,"relu_3","concat_2/in1");
+    CNNet = connectLayers(CNNet,"maxpool_2a4","concat_2/in2");
+    CNNet = connectLayers(CNNet,"maxpool_1a4","concat_2/in3");
+    CNNet = connectLayers(CNNet,"maxpool_4","concat_3/in1");
+    CNNet = connectLayers(CNNet,"maxpool_1a5","concat_3/in2");
      %CNN = initialize(CNN);
 
       
@@ -112,10 +115,11 @@ function CNN_3H2D_LCH(XTrainLCH, YTrainLCH, XTestLCH, YTestLCH, ...
         'ValidationPatience',10, ... % early stopping
         'ValidationData',{XTrain, YTrain},...
         'Plots','training-progress',...
-        'MaxEpochs', epoch,...       %'ExecutionEnvironment','parallel',...
+        'MaxEpochs', epoch,...       
+        'ExecutionEnvironment','parallel',...
         'Verbose', true,...
         'Plots','training-progress');
-    lgraph = layerGraph(CNN);
+    lgraph = layerGraph(CNNet);
     figure
     plot(lgraph)
     ModelNet = trainNetwork(XTrain, YTrain, lgraph, options);
@@ -124,6 +128,6 @@ function CNN_3H2D_LCH(XTrainLCH, YTrainLCH, XTestLCH, YTestLCH, ...
     
     YPredTest = classify(ModelNet, XTest);
     accuracy = mean(YPredTest == YTest)
-    save(filenamemat, 'XTrain',   'YTrain', 'XTest', 'YTest', 'ModelNet', "CNN", "accuracy");
+    save(filenamemat, 'XTrain',   'YTrain', 'XTest', 'YTest', 'ModelNet', "CNNet", "accuracy");
 
 end

@@ -3,13 +3,16 @@ function Classification_Laboratory(folderRuns, folderOut,cs, epoch)
 % the dataset used correspond to landraces of differents colorations
 % ( Homogeneous and heterogeneous)
 %Classification_Laboratory('../Images/LANDRACES/Clases/3H2D_LAB_E210/corridas','../Images/LANDRACES/Clases/3H2D_LAB_E210/','LAB', 300)
-
+if ~exist(folderOut, 'dir')
+    mkdir(folderOut)
+end
 %% Reading folder
 dbFoldersRuns = dir(folderRuns); 
 dbFoldersRuns(strcmp({dbFoldersRuns.name}, '.'))  = [];
 dbFoldersRuns(strcmp({dbFoldersRuns.name}, '..')) = [];
 %% For each folder that containe train and test dataset
 for i_=1:length(dbFoldersRuns)
+%for i_=1:3
     pathFoderRun = dbFoldersRuns(i_).name;
     pathMain = strcat(folderRuns, '/', pathFoderRun);
     pathDatasetFiles = dir(pathMain);
@@ -27,7 +30,7 @@ for i_=1:length(dbFoldersRuns)
         filelisttest = dir(fullfile(strcat(pathMain, '/test/'), '**\*.mat'));
         filelisttest = filelisttest(~[filelisttest.isdir]);
         [ X_test, Y_test] = Load_3H2D(filelisttest, cs);
-        dirOut = strcat(folderOut, 'outEval_',num2str(i_));
+        dirOut = strcat(folderOut, 'outEval_',num2str(i_));      
         if strcmp(cs, 'LAB') == 1
             CNN_3H2D_LAB(X_train, Y_train, X_test, Y_test, epoch, dirOut)
         else
@@ -36,7 +39,7 @@ for i_=1:length(dbFoldersRuns)
     end % end for j_
 
 end % end for i_
-
+delete(findall(0)); % Close all training progress plot
 
 end
 
