@@ -1,7 +1,6 @@
 function GroupLandracesByGroup(pathDBRead, folderMat1, folderMat2)
 %% Third (3rd) step, group landras by color, in this step eachs MAT file contains histograms and classes.
 matfile = dir(strcat(pathDBRead,'/*.mat'));
-
  %% 1. Get list of classes of color and landraces name
 listClasses = cell(1, length(matfile));
 listNames = cell(1,length(matfile));

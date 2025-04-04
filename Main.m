@@ -99,4 +99,19 @@ PlotMedianColorLandraces( 'Z:/MedianLandraces/Black/','')
 
 % Color pallete creation
 
+% para unificar los histogramas generados de cada semilla de cada categoria
+% de color, es la bd de conocimiento para el algortimo K-NN
+Create_DBKnowledge4KNN('../Images/DB');
+
+% Para la clasificación de cada semilla y generar la etiqueta de clase de
+% la semilla de cada población de frijol.
+ReadDB2AssignLabel('../Images/DB/', '../Images/LANDRACES/', 'db4knn.mat')
+
+Dataset_Split('../Images/LANDRACES/Clases/', '*.mat', '', 30)
+
+
 % Using the algoritmh for training and classify test samples
+Classification_Laboratory('../Images/LANDRACES/Clases/3H2D_LAB_E210/corridas','../Images/LANDRACES/Clases/3H2D_LAB_E210/Epoch_100/','LAB', 100)
+Classification_Laboratory('../Images/LANDRACES/Clases/3H2D_LCH_E210/corridas','../Images/LANDRACES/Clases/3H2D_LCH_E210/Epoch_500/','LCH', 500)
+
+

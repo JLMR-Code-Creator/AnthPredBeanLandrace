@@ -1,4 +1,4 @@
-function [H, pValue, W] = swtest(x, alpha)
+function [H, pValue, W] = swtest_old(x, alpha)
 %SWTEST Shapiro-Wilk parametric hypothesis test of composite normality.
 %   [H, pValue, SWstatistic] = SWTEST(X, ALPHA) performs the
 %   Shapiro-Wilk test to determine if the null hypothesis of
