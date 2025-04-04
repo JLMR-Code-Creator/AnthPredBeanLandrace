@@ -115,3 +115,4 @@ Classification_Laboratory('../Images/LANDRACES/Clases/3H2D_LAB_E210/corridas','.
 Classification_Laboratory('../Images/LANDRACES/Clases/3H2D_LCH_E210/corridas','../Images/LANDRACES/Clases/3H2D_LCH_E210/Epoch_500/','LCH', 500)
 
 
+ConcentraResultados('../Images/LANDRACES/Clases/3H2D_LAB_E210/Epoch_500', '../Images/LANDRACES/Clases/3H2D_LCH_E210/Epoch_500')
