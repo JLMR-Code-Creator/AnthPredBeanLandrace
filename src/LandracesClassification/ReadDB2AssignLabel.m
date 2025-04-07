@@ -1,7 +1,4 @@
-%% Que se ordene por la clase de mayor frecuencia
-%% Analizar la poblaciones de color amarillo variegado.
-%% Verificar si es posible agrupar poblaciones por similitud.
-
+%% Second step. Assigned label to each seed and sorted by frequency in order desc
 function ReadDB2AssignLabel(pathDB, pathImg1, nameDataSet)
 %% Firts step
    % firts step, read path of DB allocate
@@ -20,8 +17,7 @@ function iteraPoblacion(pathImg, train_lab, classes)
        mkdir(folderClases)
     end
     [fitcknn_Models] = KNNModels(train_lab, classes);
-    for ik = 1:length(matfile)
-    %for ik=length(matfile):-1:1
+    for ik = 50:length(matfile)
         archivo = matfile(ik).name;        % File name
         populationName = strrep(archivo,'.mat','');
         rutadbFile = strcat(folderClases,filesep, populationName,'.mat');
@@ -64,8 +60,8 @@ function iteraPoblacion(pathImg, train_lab, classes)
         listClassesByLandraces = {}; % for label by seed
 
 
-        for i3 = 1 : N  % In each grain get the class
-            seeds = 1:N;
+        for i3 = 1 : N    % In each grain get the class
+            seeds = 1 : N;
             seedValue =  i3;
             seeds(seeds==seedValue) = [];
             Mask_tmp = Mask; 
