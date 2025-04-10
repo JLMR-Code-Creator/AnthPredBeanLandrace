@@ -32,7 +32,7 @@ function CNN_3H2D_LAB(XTrainLAB, YTrainLAB, XTestLAB, YTestLAB, ...
         batchNormalizationLayer('Name','BN_1');
         reluLayer('Name','relu_1');
         averagePooling2dLayer(2, 'Stride', 2, 'Name','avgpool_1'); % in DeepGA stride value is 2
-        % Stack 2
+        % Stack 2 
         convolution2dLayer([3 3], 16, 'Stride', 1, 'Padding', 1, 'Name','conv_2');
         batchNormalizationLayer('Name','BN_2');
         reluLayer('Name','relu_2');

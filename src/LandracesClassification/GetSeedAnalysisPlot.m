@@ -1,13 +1,14 @@
-function  GetSeedAnalysisPlot(pathImg, target)
+function  GetSeedAnalysisPlot(pathImg, target, pathDB, nameDataSet)
     matfile = dir(strcat(pathImg,'Masks/*.mat'));    
     % Cargar mascara de cada poblaci?n
     % Folder tmp for validate name to each seed landraces
-    folderLandraces = strcat(pathImg, '/tmpImages');
+    folderLandraces = strcat(pathImg, 'tmpImages');
     if ~exist(folderLandraces, 'dir')
         mkdir(folderLandraces)
-    end    
+    end 
+    [train_lab, classes] = loadTrainDataandClases(pathDB, nameDataSet);    
     [fitcknn_Models] = KNNModels(train_lab, classes);
-     for k = 1:length(matfile)   
+     for k = 12:length(matfile)   
        archivo = matfile(k).name;        % Nombre del imagen
        populationName = strrep(archivo,'.mat',''); % Nombre de la poblaci?n
        nombre=strcat(pathImg,'Masks/');
@@ -29,6 +30,9 @@ function  GetSeedAnalysisPlot(pathImg, target)
        I = imread(strcat(pathImg,populationName,'.tif'));
        [I_Lab] = RGB2PCS(I, pathImg, strcat(populationName, '.tif'));
        I = uint8(I/256);
+       se = strel("disk",15);
+       M = Mask;
+       Mask = imerode(M,se);       
        figure('WindowState', 'maximized');       
        imshow(I);
        set(gcf, 'Units', 'Normalized', 'OuterPosition', [0 0 1 1]);
@@ -110,6 +114,7 @@ function  GetSeedAnalysisPlot(pathImg, target)
             scatter3(remainingPoints(idx==i, 3),remainingPoints(idx==i, 2),remainingPoints(idx==i, 1),12,'fill')    
             xlabel('b*'),ylabel('a*'),zlabel('L*');
           end
+          grid on
           hold off;          
           
           % Histograms
@@ -144,18 +149,18 @@ function  GetSeedAnalysisPlot(pathImg, target)
                     cie_lb_e = reshape(cie_lb, sizelab, 1)';
                     seed_test_lab =  [cie_ab_e, cie_la_e, cie_lb_e];
                     clase_lab = KNNPrediction(fitcknn_Models, seed_test_lab);                    
-                    Final_Lab_Values = [Final_Lab_Values; dataPixeles]; % Array of data colors
+                    %Final_Lab_Values = [Final_Lab_Values; dataPixeles]; % Array of data colors
                     %% If class does not exist                       
-                    if ~any(strcmp(tmpName,clase_lab)) 
-                        tmpName = [tmpName; clase_lab];
-                        if isempty(nameClassLandraces)
-                           nameClassLandraces = strcat(nameClassLandraces, clase_lab);
-                        else
-                            nameClassLandraces = strcat(nameClassLandraces, '-', clase_lab);
-                        end
-
-                        listClasses = [listClasses; clase_lab]; 
-                    end               
+                    % if ~any(strcmp(tmpName,clase_lab)) 
+                    %     tmpName = [tmpName; clase_lab];
+                    %     if isempty(nameClassLandraces)
+                    %        nameClassLandraces = strcat(nameClassLandraces, clase_lab);
+                    %     else
+                    %         nameClassLandraces = strcat(nameClassLandraces, '-', clase_lab);
+                    %     end
+                    % 
+                    %     %listClasses = [listClasses; clase_lab]; 
+                    % end               
                 end % end for
             else % Only one distribution
                 [cie_ab, cie_la, cie_lb, ~] = Pixel2DABLALB(remainingPoints);
@@ -173,7 +178,7 @@ function  GetSeedAnalysisPlot(pathImg, target)
 
 
 
-            fileName = strcat(folderLandraces,'/',num2str(i3), string(nameClassLandraces));  
+            fileName = strcat(folderLandraces,'/Frijol_',num2str(i3));  
             Mask_tmp = ~Mask_tmp;
             [subimage] = cutImage(I,uint8(Mask_tmp));
             imwrite(subimage,strcat(fileName,".png"));           
@@ -193,4 +198,59 @@ function plot3dpoints(remainingPoints)
    figure();
    scatter3(PixelValues(3,:),PixelValues(2,:),PixelValues(1,:),12,RGB,'fill');
    xlabel('b*'),ylabel('a*'),zlabel('L*');
+end
+%% Load mat file with color references
+function [train_lab, clase] = loadTrainDataandClases(pathDB, nameDataSet)
+   rootdir = pathDB;
+   filename1 = strcat(rootdir,filesep, nameDataSet);
+   db = load(filename1,'-mat');
+   train_lab = db.train_3Hlab;
+   clase =  db.clase;
+end
+function [fitcknn_Models] = KNNModels(trainData, labelTraining)
+kvector= [9, 21, 31, 41, 51 ];
+distance = 'cityblock';
+ponderar = 'squaredinverse';
+fitcknn_Models = [];
+    for K=1:length(kvector)
+        Model = ...
+            fitcknn(trainData, labelTraining, 'NumNeighbors', ...
+                    kvector(K), 'Distance', ...
+                    distance, 'DistanceWeight', ponderar);
+        s = struct('M', Model);
+        fitcknn_Models = [fitcknn_Models; s];
+    end
+end
+function [Classquatities, ClassCategories] = sortArrayElements(idx)
+    categoricItems = categorical(idx);
+    ClassCategories = categories(categoricItems);
+    Classquatities = countcats(categoricItems);
+    [Xsorted,Indx] = sort(Classquatities, "descend");
+    Classquatities = Xsorted;
+    ClassCategories = ClassCategories(Indx);
+end
+function clase = KNNPrediction(models, test)
+classes = cell(1, length(models));
+for i = 1:  length(models)
+    s = models(i);
+    Model = s.M;
+    class = predict(Model, test);   
+    classes(1, i) = class;
+end
+   %% Choose of class of maximal frecuence
+   classesCat = categorical(classes);
+   ClassCategories = categories(classesCat);
+   Classquatities = countcats(classesCat);
+   indx = find(max(Classquatities));
+   clase = ClassCategories{indx};
+end
+%% Cut ROI of seed of landraces
+function [subimage] =cutImage(Irgb,BI)
+    %LB=bwlabel(BI);
+    imgResult = Irgb .* cat(3, BI, BI, BI);
+    BI2 = ~BI;
+    imgResult = imgResult + uint8(255 * BI2);
+    bound = regionprops(BI,'BoundingBox');
+    coord = bound.BoundingBox;
+    subimage = imcrop(imgResult,[coord(1),coord(2),coord(3),coord(4)]);
 end
