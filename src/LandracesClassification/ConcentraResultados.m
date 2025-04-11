@@ -44,7 +44,14 @@ stdLCH = std(listAccuracyLCH);
 maxLCH = max(listAccuracyLCH);
 minLCH = min(listAccuracyLCH);
 
+
+
+YPredTest = classify(net, XTest);
 cm = confusionchart(YTest, YPredTest)
+
+
+YPredTest = classify(ModelNet, XTest);
+cm2 = confusionchart(YTest, YPredTest)
 
 
 % labels = {'DeepGA CNN with \newline 3 PMF for CIE L*a*b* ', ...
@@ -68,6 +75,7 @@ function [listAccuracy] = getInfo(pathDBRead)
     %% 1. Get list of classes of color and landraces name
     listAccuracy = zeros(length(matfile), 1);
     for i = 1:length(matfile)  % Iteration to each sample landraces
+        disp([num2str(i), ' ', matfile(i).name]);
         archivo = matfile(i).name;        % File name
         rutadbFile = strcat(pathDBRead,filesep, archivo);
         L = load(rutadbFile); % load file mask
