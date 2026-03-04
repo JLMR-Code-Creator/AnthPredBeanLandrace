@@ -11,8 +11,8 @@ dbFoldersRuns = dir(folderRuns);
 dbFoldersRuns(strcmp({dbFoldersRuns.name}, '.'))  = [];
 dbFoldersRuns(strcmp({dbFoldersRuns.name}, '..')) = [];
 %% For each folder that containe train and test dataset
-for i_=30:length(dbFoldersRuns)
-%for i_=1:3
+%for i_=1:length(dbFoldersRuns)
+for i_=15:15
     pathFoderRun = dbFoldersRuns(i_).name;
     pathMain = strcat(folderRuns, '/', pathFoderRun);
     pathDatasetFiles = dir(pathMain);
