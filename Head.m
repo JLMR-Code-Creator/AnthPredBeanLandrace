@@ -16,6 +16,7 @@ classdef Head
             addpath src/LandracesClassification
             addpath src\Classification
             addpath src/ColorPalette
+            addpath src\AdvanceFnc\
             close all;
             clear;
             clc;
