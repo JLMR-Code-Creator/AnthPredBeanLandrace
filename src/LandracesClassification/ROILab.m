@@ -12,4 +12,3 @@ function [dataLab, pixels] = ROILab(ILab, Mask)
     pixels(:,2:3) = pixels(:,2:3) + 129; % Escala el rango de -128/127 a 1/256 a* b*
     pixels = round(pixels);    
 end
-
