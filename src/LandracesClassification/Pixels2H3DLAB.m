@@ -1,4 +1,4 @@
-function [cielab] = Pixles2H3DLAB(pixels)
+function [cielab] = Pixels2H3DLAB(pixels)
     [rows,~] = size(pixels);
     pixels(:,1) = pixels(:,1) / 100;     % normalizaci�n [0-1]
     pixels(:,1) = pixels(:,1) * 255;     % escalado [0-127] 

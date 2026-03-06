@@ -9,9 +9,8 @@ function [totalHistogram] =  sumHistograms(histograms)
     end
 end
 
-
 %function PlotLandracesH2D()
-tipo = 2;
+tipo = 3;
 if tipo == 1 % Sumandos histogramas lab
     [tifImages, listMask, fileInfo] = Load_Tiff_Files();
     nImages = numel(tifImages);
@@ -60,6 +59,8 @@ elseif tipo==3 % Acumulando el conjuntos de datos antes de la generación del hi
     end
     % Generate histogram from accumulated pixel data
     [cie_ch, cie_lc, cie_lh, c1] = Pixels2Hist2DCHLCLH(listPixel);
+    [cie_ab, cie_la, cie_lb, pixels] = Pixel2DABLALB(listPixel);
+
         
 end
 %end
