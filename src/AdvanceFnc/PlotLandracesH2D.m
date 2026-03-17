@@ -60,7 +60,10 @@ elseif tipo==3 % Acumulando el conjuntos de datos antes de la generación del hi
     % Generate histogram from accumulated pixel data
     [cie_ch, cie_lc, cie_lh, c1] = Pixels2Hist2DCHLCLH(listPixel);
     [cie_ab, cie_la, cie_lb, pixels] = Pixel2DABLALB(listPixel);
-
+    [cie_abs, cie_las, cie_lbs, pixels] = Pixel2DABLALBEscala(listPixel, 128);
+    cie_absr = cie_abs(50:90, 50:90);
+    %cie_lasr = cie_las(20:60, 30:90);
+    %cie_lbsr = cie_lbs(20:60, 30:90);
         
 end
 %end

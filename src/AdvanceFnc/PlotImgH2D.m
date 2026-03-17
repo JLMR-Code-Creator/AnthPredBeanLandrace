@@ -1,4 +1,4 @@
-fileList = seleccionarImagenesOpenUI()
+fileList = seleccionarImagenesOpenUI();
 data_list = [];
 % Process each selected image
 for i = 1:size(fileList, 1)
