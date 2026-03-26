@@ -60,7 +60,7 @@ function REGION = ColorRegionGrowingLab(I, Lab ,maxdist, x,y)
                    (SEED(1,1,2) > - 26 && SEED(1,1,2) <   12) && ... % a*
                    (SEED(1,1,3) > - 26 && SEED(1,1,3) <   29))        % b*
                     if(maxdist==0)
-                       maxdist = 20; % Fondo azul claro poblaciones homogeneas
+                       maxdist = 30; % Fondo azul claro poblaciones homogeneas
                     end
                     w1 = 0.1934; 
                     w2 = 0.9295; 
@@ -110,6 +110,6 @@ function REGION = ColorRegionGrowingLab(I, Lab ,maxdist, x,y)
     end
     if(exist('y','var')==0)
       close('SEGMENTACION');
+      close(h1)
     end
-  close(h1)
 end

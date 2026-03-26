@@ -13,21 +13,25 @@ function [output] = Impl_Segmentation(imgPath,extension)
     end   
 
     I_rgb = imread(strcat(imgPath,imgfile));    % Lectura de la imagen    
-    Lab = ColorCalibration(I_rgb);  
-    disp([datestr(datetime), ' Segmentados ']);
-    Mask = ColorRegionGrowingLab(I_rgb, Lab, 0);     % crecimiento de region  
+    %Lab = ColorCalibration(I_rgb);  
+    Lab = rgb2lab(I_rgb);
+    disp([datestr(datetime), ' Segmentados ']);    
+    Mask = ColorRegionGrowingVectorized(I_rgb, Lab, 30);     % crecimiento de region  
     Mask = ~Mask;
+    %Mask = ~Mask;
     % Clean up small groups pixels
     [ML, ~]=bwlabel(Mask);         % Etiquetar granos de frijol conectados
     propied= regionprops(ML);      % Calcular propiedades de los objetos de la imagen
-    s=find([propied.Area] < 1000); % grupos menores a 100 px
+    s=find([propied.Area] < 15000); % grupos menores a 100 px
     for i=1:size(s,2)              % eliminaci�n de pixeles
         index = ML == s(i);
         Mask(index) = 0;
     end         
     Mask = ~Mask;
+
     disp([datestr(datetime), ' Fin segmentación ']);
-    figure;
+    fh = figure();
+    fh.WindowState = 'maximized';
     subplot(2,2,1), imagesc(I_rgb), title('Original');  
     borde = ~Mask;
     segmento=double(I_rgb);  % Obtenci?n de la imagen para dejar la parte segmentada
