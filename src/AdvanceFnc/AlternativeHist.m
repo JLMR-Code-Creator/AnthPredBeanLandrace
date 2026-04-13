@@ -34,6 +34,7 @@ A = listPixel(:,2);
 B = listPixel(:,3);
 A  =  A + 129;
 B  =  B + 129;
+figure();
 hdata = histogram2(A,B,[50 50],'FaceColor','flat');
 colorbar
 xlim ([1 256])
