@@ -102,7 +102,7 @@ function CNN_3H2D_LCH(XTrainLCH, YTrainLCH, XTestLCH, YTestLCH, ...
 
       
 
-     %deepNetworkDesigner(CNN)
+     deepNetworkDesigner(CNNet)
      %figure
      %plot(cnn);
 

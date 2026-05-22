@@ -26,13 +26,14 @@ else
 end
 
 figure();
-labels = {'DeepGA CNN con \newline 3 PMF en CIE L*a*b*', ...
-          'DeepGA CNN con \newline 3 PMF en CIE L*C*h*'};
+labels = {'DeepGA CNN with 3 PMF in CIE L*a*b*', ...
+          'DeepGA CNN with 3 PMF in CIE L*C*h°'};
 boxplot([listAccuracyLAB(:); listAccuracyLCH(:)], ...
-        [repmat({'LAB'}, 30, 1); repmat({'LCH'}, 30, 1)]);
+        [repmat({'DeepGA CNN con 3 PMF en CIE L*a*b*'}, 30, 1); ...
+         repmat({'DeepGA CNN con 3 PMF en CIE L*C*h°'}, 30, 1)]);
 ylabel('Accuracy');
 
-
+boxplot([listAccuracyLAB(:), listAccuracyLCH(:)],'Labels',labels), ylabel('Accuracy');
 
 meanLAB = mean(listAccuracyLAB);
 stdLAB = std(listAccuracyLAB);

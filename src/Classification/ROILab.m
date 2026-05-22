@@ -4,7 +4,7 @@ function [dataLab, pixels] = ROILab(ILab, Mask)
     indices = find(MaskV == 0);
     data_raw=reshape(ILab,global_rows*global_cols,3);
     dataLab=data_raw(indices,:);
-    pixels = dataLab;
+    pixels = dataLab(:,:);
     [rows,~] = size(pixels);
     pixels(:,1) = pixels(:,1) / 100;     % l* normalizaci?n
     pixels(:,1) = pixels(:,1) * 255;     % l* escalado a 
