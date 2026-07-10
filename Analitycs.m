@@ -1,7 +1,3 @@
-
-
-
-
 function management_switch(option, varargin)
 % MANAGEMENT_SWITCH Simple switch for management options.
 %   MANAGEMENT_SWITCH(OPTION) performs the action specified by OPTION.
