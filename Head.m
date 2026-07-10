@@ -17,6 +17,8 @@ classdef Head
             addpath src\Classification
             addpath src/ColorPalette
             addpath src\AdvanceFnc\
+            addpath src\MDS\
+            addpath src\utils\
             close all;
             clear;
             clc;
