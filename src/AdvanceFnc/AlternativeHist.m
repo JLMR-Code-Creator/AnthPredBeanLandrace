@@ -30,8 +30,8 @@ finalParm = fminsearch(zFunc, initParm);
     end
 end
 
-A = listPixel(:,2);
-B = listPixel(:,3);
+A = data_list(:,2);
+B = data_list(:,3);
 A  =  A + 129;
 B  =  B + 129;
 figure();
