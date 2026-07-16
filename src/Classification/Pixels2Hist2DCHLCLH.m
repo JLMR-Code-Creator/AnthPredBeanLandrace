@@ -1,4 +1,4 @@
-function [cie_ch, cie_lc, cie_lh, c1] = Pixels2Hist2DCHLCLH(datosLAB)
+function [cie_ch, cie_lc, cie_lh, c1, h1] = Pixels2Hist2DCHLCLH(datosLAB)
 % Pixels2Hist2D genera matriz de probabilidad
 % conjunta en los espacios de color HSI y CIE L*A*B* considerando solo
 % los matices en los canales HS y AB.
@@ -36,7 +36,7 @@ toc
 cie_lc=cie_lc/rows;
 disp([datestr(datetime), ' Histograma 2D de L*C* creado']);
 
-cie_lh=zeros(361,361);
+cie_lh=zeros(100,361);
 tic
 for i=1:rows
     ind = datosLAB(i,:);

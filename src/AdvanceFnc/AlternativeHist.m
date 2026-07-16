@@ -30,16 +30,18 @@ finalParm = fminsearch(zFunc, initParm);
     end
 end
 
-A = data_list(:,2);
-B = data_list(:,3);
-A  =  A + 129;
-B  =  B + 129;
-figure();
-hdata = histogram2(A,B,[50 50],'FaceColor','flat');
-colorbar
-xlim ([1 256])
-ylim ([1 256])
+[L1, c1,h1] = CromaHueChannel1(data_list);
+A = c1;
+B = L1;
+%A  =  A + 129;
+%B  =  B + 129;
 
+figure();
+hdata = histogram2(A,B,[360 360],'FaceColor','flat');
+colorbar
+xlim ([1 360])
+ylim ([1 360])
+figure();
 xVals = (hdata.XBinEdges(2:end) + hdata.XBinEdges(1:end-1))/2.0;
 yVals = (hdata.YBinEdges(2:end) + hdata.YBinEdges(1:end-1))/2.0;
 [xVal2D,yVal2D] = meshgrid(xVals,yVals);
@@ -68,12 +70,12 @@ y0 = finalParm(6);
 xC = ((xVal2D-x0).*cosd(theta) - (yVal2D-y0).*sind(theta)).^2;
 yC = ((xVal2D-x0).*sind(theta) + (yVal2D-y0).*cosd(theta)).^2;
 zModel = Amp.*exp( -(xC./(2.0*xG)) - (yC./(2.0*yG)) );
-figure();
+
 sgtitle('2D Gaussian Fit');
-subplot(4,4,4)
-histogram2(A,B,[50 50],'FaceColor','flat')
-subplot(4,4,[5 6 7 9 10 11 13 14 15]);
-imagesc(xVal2D(1,:),yVal2D(:,1)',zVal2D);
+subplot(4, 4, 4)
+histogram2(A, B, [50 50], 'FaceColor', 'flat')
+subplot(4, 4, [5 6 7 9 10 11 13 14 15]);
+imagesc(xVal2D(1,:), yVal2D(:,1)', zVal2D);
 hold on;
 set(gca,'ydir','normal');
 col0 = find(xVals>x0,1,'first');
