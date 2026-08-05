@@ -16,7 +16,7 @@ function [output] = Impl_Segmentation(imgPath,extension)
     %Lab = ColorCalibration(I_rgb);  
     Lab = rgb2lab(I_rgb);
     disp([datestr(datetime), ' Segmentados ']);    
-    Mask = ColorRegionGrowingVectorized(I_rgb, Lab, 30);     % crecimiento de region  
+    Mask = ColorRegionGrowingLab_old(I_rgb, Lab,0);     % crecimiento de region  
     Mask = ~Mask;
     %Mask = ~Mask;
     % Clean up small groups pixels

@@ -1,115 +1,265 @@
-function REGION = ColorRegionGrowingLab(I, Lab ,maxdist, x,y)
-% ColorRegionGrowing Segmentaci�n por crecimiento de regi�n con pixel
-% semilla.
-% Entrada: 
-%         I: matriz de nxmxz correspondiente a una imagen RGB.
-%         x: coordenada de x del pixel semilla
-%         y: coordenada de y del pixel semilla
-%         maxdist: m�xima distancia entre pixel semilla y pixel vecino
-% Salida:
-%        REGION:matriz binaria de nxm que corresponde a la mascara de
-%        segmentaci�n.
+function [REGION, info] = ColorRegionGrowingLab(I, Lab, maxdist, x, y, useWeightedDistance)
+%COLORREGIONGROWINGLAB Segmentacion vectorizada por crecimiento de region.
+%
+%   REGION = ColorRegionGrowingLab(I, Lab, maxdist, x, y)
+%   [REGION, INFO] = ColorRegionGrowingLab(...)
+%   [...] = ColorRegionGrowingLab(..., useWeightedDistance)
+%
+% Entradas
+%   I       : imagen usada para seleccionar interactivamente la semilla.
+%   Lab     : imagen MxNx3 en el espacio CIE L*a*b*.
+%   maxdist : distancia maxima respecto al color de la semilla. Si vale 0,
+%             se seleccionan automaticamente el umbral y los pesos.
+%   x, y    : fila y columna de la semilla. Si se omiten, se solicitan con
+%             el raton.
+%   useWeightedDistance : opcional. false conserva el comportamiento
+%             numerico efectivo del codigo original (distancia euclidiana
+%             sin pesos). true aplica los pesos definidos para cada fondo.
+%
+% Salidas
+%   REGION  : mascara logica MxN correspondiente al componente de 8 vecinos
+%             que contiene al pixel semilla.
+%   info    : estructura con el dispositivo y parametros utilizados.
+%
+% Optimizaciones principales
+%   1) Calcula simultaneamente la distancia de todos los pixeles.
+%   2) Compara distancias al cuadrado y evita calcular sqrt.
+%   3) Extrae el componente conectado mediante imreconstruct.
+%   4) Usa GPU automaticamente cuando esta disponible; si falla, usa CPU.
+%
+% Requiere Image Processing Toolbox para imreconstruct. El uso de GPU
+% requiere Parallel Computing Toolbox y una GPU compatible.
 
-%    h = fspecial('gaussian',[3 3]); % matriz peque�a para suavizado
-%    I = imfilter(I, h); % Aplicaci�n de suavizado
-    I = im2double(I);   % valores de la imagen al tipo double
-    % pedir coordenadas de pixel semilla
-    if(exist('y','var')==0) % petici�n de coordenadas si no fueron especificadas.
-        %
-        h1 = figure('name', 'SEGMENTACION','NumberTitle','off'), imshow(I,[]), [y,x]=getpts(h1); 
-        y=round(y(1)); 
-        x=round(x(1)); 
+    narginchk(3, 6);
+
+    if nargin < 6 || isempty(useWeightedDistance)
+        % El codigo original calcula una distancia ponderada, pero la
+        % sobrescribe inmediatamente con la distancia no ponderada.
+        % false mantiene el resultado efectivo de esa implementacion.
+        useWeightedDistance = false;
     end
 
-    %Lab = rgb2lab(I);  % conversi?n al espacio de color CIE L*A*B*
-    SEED = Lab(x,y,:); % Coordenadas para la obtenci�n del pixel semilla
-    w1 = 0;          % Pesos 
-    w2 = 0;
-    w3 = 0;
+    validateattributes(Lab, {'single', 'double'}, ...
+        {'real', 'nonsparse', 'nonempty'}, mfilename, 'Lab', 2);
 
-    if(maxdist==0) % si distancia no es especificada en la funci�n
-           if((SEED(1,1,1) > 29 && SEED(1,1,1) < 85) && ...     % l*
-              (SEED(1,1,2) > -5.20 && SEED(1,1,2) < 15) && ...  % a*
-              (SEED(1,1,3) > -17.58 && SEED(1,1,3) < 8))        % b*
-                   if(maxdist==0)
-                       maxdist = 20; % Fondo blanco poblaciones de color negro
-                   end
-                    w1 = 0.2422;
-                    w2 = 1.3760;
-                    w3 = 0.8780;
-           elseif((SEED(1,1,1) >   0 && SEED(1,1,1) <  43) && ... % l*
-                  (SEED(1,1,2) > - 7 && SEED(1,1,2) <  12) && ... % a*
-                  (SEED(1,1,3) > - 10 && SEED(1,1,3) < 29))       % b*
-                   if(maxdist==0)
-                       maxdist = 25; %Fondo negro poblaciones de color blanco
-                   end
-                    w1 = 0.6264;
-                    w2 = 1.3282;
-                    w3 = 0.9493;
-            elseif((SEED(1,1,1) >   0 && SEED(1,1,1) <   90) && ... % l*
-                   (SEED(1,1,2) > - 130 && SEED(1,1,2) <    5) && ... % a*
-                   (SEED(1,1,3) > - 130 && SEED(1,1,3) <   9))        % b*
-                    if(maxdist==0)
-                        maxdist = 20; % Fondo azul claro poblaciones de varios colores
-                    end
-                    w1 = 0.3241; 
-                    w2 = 1.1672; 
-                    w3 = 0.8521; 
-                    
-           elseif((SEED(1,1,1) >   0 && SEED(1,1,1) <   94) && ... % l*
-                   (SEED(1,1,2) > - 26 && SEED(1,1,2) <   12) && ... % a*
-                   (SEED(1,1,3) > - 26 && SEED(1,1,3) <   29))        % b*
-                    if(maxdist==0)
-                       maxdist = 30; % Fondo azul claro poblaciones homogeneas
-                    end
-                    w1 = 0.1934; 
-                    w2 = 0.9295; 
-                    w3 = 1.2818;                    
-           else
-               h = msgbox('Intente con nueva semilla pixel alejada del grano de frijol y el fondo a usar para contrastar debe ser negro, blanco o azul claro ','Nuevo intento');
-               close all;
-               return;
-           end
-
+    if size(Lab, 3) ~= 3
+        error('ColorRegionGrowingLab:InvalidLab', ...
+            'Lab debe ser una matriz MxNx3.');
     end
-    Isizes = size(I); % Rangos de dimensi?n de imagen
-    neigb = [-1 0; 1 0; 0 -1;0 1; -1 1;1 1;-1 -1;1 -1]; % 8 vecinos
-    REGION = zeros(size(I,1), size(I,2)); % Salida
-    REGION(x,y) = 1;
-    Vecinos_Pendientes = [];
-    Vecinos_Pendientes = [Vecinos_Pendientes;x,y];
-    while(~isempty(Vecinos_Pendientes))
-        x = Vecinos_Pendientes(1,1);% valor 1 de la posici�n 1
-        y = Vecinos_Pendientes(1,2);% valor 2 de la posici�n 2
-        % Recorrer los pixeles vecinos
-        for j=1:size(neigb,1) % Recorrer las coordenas de los 8 vecinos
-            % Calcula la coordenada del pixel vecino
-            xn = x + neigb(j,1); 
-            yn = y + neigb(j,2);
-            % Limites de la imagen
-            limite = (xn >= 1) && (xn <= Isizes(1)) && (yn >= 1) && (yn <= Isizes(2));
 
-            % Agrega vecino sin sobrepasar el l�mite
-            if (limite && ( REGION(xn,yn) == 0))                  
-               D_l = (Lab(xn,yn,1) - SEED(1,1,1)).^2;
-               D_a = (Lab(xn,yn,2) - SEED(1,1,2)).^2;
-               D_b = (Lab(xn,yn,3) - SEED(1,1,3)).^2;
-               ac = w1*D_l + w2*D_a + w3*D_b;
-               ac = D_l + D_a + D_b;
-               ac = double(ac);      
-               DIST = sqrt(ac);
-               if (DIST < maxdist)% si no sobrepasa la distancia
-                  REGION(xn,yn) = 1;  % es un pixel similar
-                  Vecinos_Pendientes = [Vecinos_Pendientes;xn,yn];
-               else
-                  REGION(xn,yn)=0;                                      
-               end  
+    validateattributes(maxdist, {'numeric'}, ...
+        {'real', 'finite', 'scalar', 'nonnegative'}, ...
+        mfilename, 'maxdist', 3);
+    validateattributes(useWeightedDistance, {'logical', 'numeric'}, ...
+        {'real', 'finite', 'scalar'}, mfilename, 'useWeightedDistance', 6);
+    useWeightedDistance = logical(useWeightedDistance);
+
+    nRows = size(Lab, 1);
+    nCols = size(Lab, 2);
+    interactiveSeed = nargin < 5 || isempty(x) || isempty(y);
+
+    if interactiveSeed
+        if isempty(I)
+            error('ColorRegionGrowingLab:MissingImage', ...
+                'I no puede estar vacia cuando la semilla es interactiva.');
+        end
+        if size(I, 1) ~= nRows || size(I, 2) ~= nCols
+            error('ColorRegionGrowingLab:SizeMismatch', ...
+                'I y Lab deben tener el mismo numero de filas y columnas.');
+        end
+
+        hFigure = figure('Name', 'SEGMENTACION', 'NumberTitle', 'off');
+        imshow(I);
+        title('Seleccione el pixel semilla');
+
+        % getpts entrega primero columna y despues fila.
+        [selectedColumn, selectedRow] = getpts(hFigure);
+        if isempty(selectedRow)
+            if isgraphics(hFigure), close(hFigure); end
+            error('ColorRegionGrowingLab:SeedNotSelected', ...
+                'No se selecciono ningun pixel semilla.');
+        end
+
+        x = round(selectedRow(1));
+        y = round(selectedColumn(1));
+        if isgraphics(hFigure), close(hFigure); end
+    end
+
+    validateattributes(x, {'numeric'}, ...
+        {'real', 'finite', 'scalar', 'integer', '>=', 1, '<=', nRows}, ...
+        mfilename, 'x', 4);
+    validateattributes(y, {'numeric'}, ...
+        {'real', 'finite', 'scalar', 'integer', '>=', 1, '<=', nCols}, ...
+        mfilename, 'y', 5);
+
+    seed = reshape(Lab(x, y, :), 1, 3);
+    weights = [1, 1, 1];
+    automaticParameters = (maxdist == 0);
+
+    if automaticParameters
+        [maxdist, automaticWeights, validSeed] = localAutomaticParameters(seed);
+
+        if ~validSeed
+            REGION = false(nRows, nCols);
+            info = localInfo(false, maxdist, weights, [x, y], ...
+                useWeightedDistance, automaticParameters, nnz(REGION));
+            warning('ColorRegionGrowingLab:InvalidAutomaticSeed', ...
+                ['No fue posible clasificar el fondo a partir de la semilla. ', ...
+                 'Seleccione una semilla alejada del grano y use fondo ', ...
+                 'negro, blanco o azul claro.']);
+            return;
+        end
+
+        if useWeightedDistance
+            weights = automaticWeights;
+        end
+    end
+
+    useGPU = localCanUseGPU();
+    usedGPU = false;
+
+    if useGPU
+        try
+            REGION = localSegmentGPU(Lab, seed, weights, maxdist, x, y);
+            usedGPU = true;
+        catch gpuException
+            warning('ColorRegionGrowingLab:GPUFallback', ...
+                ['La ejecucion en GPU fallo y se continuara en CPU. ', ...
+                 'Detalle: %s'], gpuException.message);
+            REGION = localSegmentCPU(Lab, seed, weights, maxdist, x, y);
+        end
+    else
+        REGION = localSegmentCPU(Lab, seed, weights, maxdist, x, y);
+    end
+
+    info = localInfo(usedGPU, maxdist, weights, [x, y], ...
+        useWeightedDistance, automaticParameters, nnz(REGION));
+end
+
+function REGION = localSegmentCPU(Lab, seed, weights, maxdist, x, y)
+% Calcula el mapa completo de similitud de forma vectorizada.
+    localWeights = cast(weights, 'like', Lab);
+    thresholdSquared = cast(maxdist .* maxdist, 'like', Lab);
+
+    dL = Lab(:, :, 1) - seed(1);
+    da = Lab(:, :, 2) - seed(2);
+    db = Lab(:, :, 3) - seed(3);
+
+    distanceSquared = localWeights(1) .* (dL .* dL) + ...
+                      localWeights(2) .* (da .* da) + ...
+                      localWeights(3) .* (db .* db);
+
+    candidateMask = distanceSquared < thresholdSquared;
+
+    % Conserva unicamente el componente de 8 vecinos que contiene la semilla.
+    marker = false(size(candidateMask));
+    marker(x, y) = true;
+    REGION = imreconstruct(marker, candidateMask, 8);
+    REGION = logical(REGION);
+end
+
+function REGION = localSegmentGPU(Lab, seed, weights, maxdist, x, y)
+% La parte numericamente intensiva y la reconstruccion se ejecutan en GPU.
+    LabGPU = gpuArray(Lab);
+    seedGPU = gpuArray(cast(seed, 'like', Lab));
+    weightsGPU = gpuArray(cast(weights, 'like', Lab));
+    thresholdSquaredGPU = gpuArray(cast(maxdist .* maxdist, 'like', Lab));
+
+    dL = LabGPU(:, :, 1) - seedGPU(1);
+    da = LabGPU(:, :, 2) - seedGPU(2);
+    db = LabGPU(:, :, 3) - seedGPU(3);
+
+    distanceSquared = weightsGPU(1) .* (dL .* dL) + ...
+                      weightsGPU(2) .* (da .* da) + ...
+                      weightsGPU(3) .* (db .* db);
+
+    candidateMask = distanceSquared < thresholdSquaredGPU;
+
+    marker = gpuArray(false(size(candidateMask)));
+    marker(x, y) = true;
+    regionGPU = imreconstruct(marker, candidateMask, 8);
+
+    REGION = logical(gather(regionGPU));
+end
+
+function tf = localCanUseGPU()
+% Compatible con versiones recientes y anteriores de MATLAB.
+    tf = false;
+
+    if exist('canUseGPU', 'file') ~= 0
+        try
+            tf = canUseGPU;
+            return;
+        catch
+            % Se intenta el metodo compatible con versiones anteriores.
+        end
+    end
+
+    if exist('gpuDeviceCount', 'file') ~= 0
+        try
+            tf = gpuDeviceCount('available') > 0;
+        catch
+            try
+                tf = gpuDeviceCount > 0;
+            catch
+                tf = false;
             end
         end
-        Vecinos_Pendientes(1,:)=[];
     end
-    if(exist('y','var')==0)
-      close('SEGMENTACION');
-      close(h1)
+end
+
+function [maxdist, weights, validSeed] = localAutomaticParameters(seed)
+% Mantiene el orden y los intervalos del codigo proporcionado.
+    L = double(seed(1));
+    a = double(seed(2));
+    b = double(seed(3));
+
+    maxdist = 0;
+    weights = [1, 1, 1];
+    validSeed = true;
+
+    if L > 29 && L < 85 && a > -5.20 && a < 15 && b > -17.58 && b < 8
+        maxdist = 20;
+        weights = [0.2422, 1.3760, 0.8780];
+    elseif L > 0 && L < 43 && a > -7 && a < 12 && b > -10 && b < 29
+        maxdist = 25;
+        weights = [0.6264, 1.3282, 0.9493];
+    elseif L > 0 && L < 90 && a > -130 && a < 5 && b > -130 && b < 9
+        maxdist = 20;
+        weights = [0.3241, 1.1672, 0.8521];
+    elseif L > 0 && L < 94 && a > -26 && a < 12 && b > -26 && b < 29
+        maxdist = 30;
+        weights = [0.1934, 0.9295, 1.2818];
+    else
+        validSeed = false;
+    end
+end
+
+function info = localInfo(usedGPU, maxdist, weights, seedPosition, ...
+        useWeightedDistance, automaticParameters, pixelCount)
+    info = struct( ...
+        'UsedGPU', logical(usedGPU), ...
+        'ExecutionDevice', localDeviceName(usedGPU), ...
+        'MaxDistance', maxdist, ...
+        'Weights', weights, ...
+        'DistanceMode', localDistanceMode(useWeightedDistance), ...
+        'AutomaticParameters', logical(automaticParameters), ...
+        'SeedRowColumn', seedPosition, ...
+        'SegmentedPixelCount', pixelCount);
+end
+
+function name = localDeviceName(usedGPU)
+    if usedGPU
+        name = 'GPU';
+    else
+        name = 'CPU';
+    end
+end
+
+function mode = localDistanceMode(useWeightedDistance)
+    if useWeightedDistance
+        mode = 'Weighted squared Euclidean';
+    else
+        mode = 'Euclidean (compatible with original code)';
     end
 end

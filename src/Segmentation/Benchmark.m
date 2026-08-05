@@ -1,5 +1,5 @@
 % Cargar tu imagen de prueba (ej. granos de frijol)
-I = imread('C:\Users\jose_\OneDrive\Documents\CIDEA\CaféCereza\TIFF\M1-1-7.tif');
+I = imread('D:\CIDEA\Pob de friijol 2026\TIF\PV-58_001.tif');
 Lab = rgb2lab(I);
 x = 100; y = 100; % Punto de prueba
 dist = 20;

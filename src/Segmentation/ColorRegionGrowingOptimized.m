@@ -1,4 +1,4 @@
-function REGION = ColorRegionGrowing2Lab(I, Lab, maxdist, x, y)
+function REGION = ColorRegionGrowingOptimized(I, Lab, maxdist, x, y)
     % Optimización: Uso de buffer circular para la cola y vectorización
     
     I = im2double(I);

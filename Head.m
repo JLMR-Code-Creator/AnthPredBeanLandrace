@@ -19,6 +19,7 @@ classdef Head
             addpath src\AdvanceFnc\
             addpath src\MDS\
             addpath src\utils\
+            addpath src\BeanLandracesSegmentation\
             close all;
             clear;
             clc;
